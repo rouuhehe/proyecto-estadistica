@@ -1,0 +1,804 @@
+---
+title: "Tendencias y factores clave en la compra de laptops por estudiantes universitarios en Lima Metropolitana."
+author:
+  - Yaritza Milagros López Rojas
+  - Carlos Alberto Zavalaga Hilasaca
+  - Sydni Samina Sánchez León
+  - Gerardo Alair Angulo Huanca
+  - Paulo Isael Miranda Barrientos
+lang: es
+format:
+  html:
+    toc: true
+    toc-location: right
+    number-sections: true
+    theme: cosmo
+    fontsize: 1.1em
+    code-fold: true
+editor: visual
+---
+
+# Introducción
+
+## Relevancia
+
+Conocer las tendencias y procesos detrás de la decisión de compra de laptops de estudiantes universitarios es importante tanto para el sector comercial, por las oportunidades de mercado, como para los estudiantes. Pues su objetivo es elegir una laptop que responda a las exigencias y competencias académicas. Este estudio se centra en recolectar y analizar la relación entre factores clave que influyen en la compra de laptops por parte de estudiantes universitarios de Lima Metropolitana. De esta manera, se logrará no solo identificar patrones de consumo, sino también servirá de guía para futuros compradores.
+
+## Objetivos:
+
+### Objetivo General:
+
+Identificar las principales tendencias y factores que, en 2025, influyen en la elección de laptops por parte de los estudiantes, tomando en cuenta sus necesidades y preferencias tecnológicas.
+
+### Objetivos Específicos:
+
+-   Explorar la relación entre la carrera del estudiante y el factor de mayor importancia en la elección de laptops por parte de los estudiantes.
+
+-   Analizar la relación entre el factor de mayor importancia en el momento de la elección de laptops y la escala socioeconómica de los alumnos.
+
+## Contexto:
+
+Con el paso de los años, la tecnología de las laptops fue mostrando grandes avances. Cada vez hay nuevas marcas y modelos de laptop en el mercado. Lo que generó una gran diversidad de información relacionada a ese sector. Por ello, para muchos estudiantes universitarios, la elección de una laptop se volvió una decisión muy compleja. Esto debido a la amplia gama de características y especificaciones a tomar en cuenta. Por este motivo los estudiantes tienen que investigar muchas fuentes para elegir una laptop acorde a sus necesidades.
+
+## Planificación:
+
+Nos ayudamos con un diagrama de Gantt para la repartición de tareas y establecimiento de fechas. Esto con el fin de avanzar las actividades relacionadas al estudio de una manera ordenada y eficiente.
+
+```{r, , message=FALSE, warning=FALSE, echo=TRUE}
+#install.packages("ggplot2)
+#install.packages("tidyr")
+#install.packages("lubridate")
+library(ggplot2)
+library(tidyr)
+library(lubridate)
+library(dplyr)
+library(readr)
+
+today <- Sys.Date()
+diagrama <- read.csv("Diagrama de gantt 2 .csv") 
+diagrama$Start <- paste(diagrama$Start,"/2025") 
+diagrama$End <- paste(diagrama$End,"/2025") 
+diagrama$Start <- dmy(diagrama$Start) 
+diagrama$End <- dmy(diagrama$End) 
+
+for (i in 1:nrow(diagrama)) {
+  if (diagrama$End[i] < today) {
+    diagrama$Completado[i] <- "Verdadero"
+  } else {
+    diagrama$Completado[i] <- "Falso"
+  }
+}
+orden_etapas <- c()
+for (i in 1:nrow(diagrama)) {
+  orden_etapas[i]<- diagrama$Etapa[i]
+}
+orden_etapas <- rev(orden_etapas)
+
+df <- diagrama
+
+df.melt <- df %>%
+  tidyr::pivot_longer(col = c(Start, End))
+
+df.melt$Etapa <- factor(df.melt$Etapa, levels = orden_etapas)
+
+p1 <- ggplot(df.melt, aes(x = value, y = Etapa, colour = Completado))
+p1 <- p1 + geom_line(alpha = 0.5, linewidth = 7)
+p1 <- p1 + labs(title = "Diagrama de Gantt")
+p1 <- p1 + labs(x = "Fecha")
+p1 <- p1 + geom_vline(xintercept = today, color = "gray", linewidth = 2, alpha = 0.5)
+
+p1
+
+```
+
+primero al formato de 24 horas. para destacar\
+paquete de fechas lubridate
+
+# Datos
+
+## Población objetivo:
+
+### Población:
+
+Todos los estudiantes de universidades de Lima Metropolitana que poseen una laptop.
+
+### Muestra
+
+200 estudiantes de diferentes universidades de Lima Metropolitana que cuentan con una laptop.
+
+### Tipo de muestreo:
+
+Se empleó un muestreo no probabilístico por conveniencia porque escogimos a personas de nuestro entorno cercano.
+
+## Recolección de datos:
+
+Se realizó una encuesta por Google Forms a estudiantes de diversas carreras de muchas universidades de Lima Metropolitana (tales como la UTEC, PUCP, UNI y otros). Esto con el objetivo de asegurar una muestra representativa de nuestra población.
+
+## Variables:
+
+| *Variable* | *Tipo* | *Descripción* | *Restricciones* |
+|------------------|------------------|------------------|------------------|
+| Edad | Cuantitativa discreta | Edad en años del estudiante encuestado. | Es un número entero mayor igual a 16 y menor igual a 29 |
+| Antigüedad | Cuantitativa discreta | Número de años que pasaron desde la laptop. | Es un número entero no negativo. |
+| RAM | Cuantitativa discreta | Capacidad de la RAM medida en GB. | Es un número entero no negativos. |
+| Costo | Cuantitativa continua | Precio de la laptop en moneda local. | Número no negativo |
+| Tiempo de uso | Cuantitativa continua | Tiempo en horas de uso diario. | Número no negativo |
+| Marca | Cualitativa nominal | Marca de la laptop adquirida. | Ejemplo: HP, Dell, Lenovo, Apple y otros. |
+| Sexo | Cualitativa nominal | Sexo del estudiante. | Deber ser o Masculino o Femenino |
+| Tipo | Cualitativa nominal | Clasificación según diseño o funcionalidad. | Las mencionadas en las alternativas: Ultrabook, Gamer y otros. |
+| Carrera | Cualitativa nominal | Área de la cual pertenece la carrera del estudiante. | Las mencionadas en las alternativas: Ingeniería, Ciencias y otros. |
+| Factor importante | Cualitativa nominal | Criterio principal en la decisión de compra. | Las mencionadas en las alternativas: precio, marca, diseño y otros. |
+| Sistema operativo | Cualitativa nominal | Sistema operativo instalado. | Las mencionadas en las alternativas. Ejemplo: Windows, macOS, y otros. |
+| Publicidad | Cualitativa ordinal | Percepción sobre la influencia de la publicidad en la compra. | Cinco grados desde muy influenciado a muy influenciado. |
+| Satisfacción | Cualitativa ordinal | Grado de satisfacción del estudiante respecto a la laptop. | Cinco grados desde muy satisfecho a muy insatisfecho. |
+| Escala | Cualitativa ordinal | Información socioeconómica del estudiante. | Desde la A hasta la E de acuerdo al INEI. |
+
+# Limpieza de datos
+
+Del excel obtenido de la encuesta. Se procede a verificar la cantidad de datos faltantes por fila además de la revisión de cada variable. Esto para eliminar columnas innecesarias. Entre ellas se encuentran las que solo tiene celdas vacías. Además de aquellas no relacionadas al estudio. Tales como la columna de los grupos y la de los nombres de los investigadores.
+
+Para el desarrollo del análisis se usarán las siguientes librerías:
+
+```{r}
+library(dplyr)
+library(readr)
+```
+
+Ahora cargaremos el archivo. Donde se mostrará que cumplimos con la meta de 200 encuestados.
+
+```{r}
+DFO <- read.csv("Tendencias y factores clave (csv directo).csv")
+DF = DFO
+DFPgrupo <- filter(DFO,DFO$X.Cuál.es.el.grupo.que.te.está.encuestando. == "Grupo 9")
+nrow(DFPgrupo)
+
+```
+
+De modo que al obtener 201 encuestados. Cumplimos con lo requerido.\
+A continuación se actualizan los nombres de las columnas del dataframe.
+
+```{r}
+
+
+# Eliminando las columnas de entrevistador y entrevistado
+DF = DFO[, -c(1:12, 27)]
+
+# Renombrando las columnas
+DF = DF %>% rename(Carrera = "Área.de.la.carrera.que.estudias")
+DF = DF %>% rename(Escala = "X.Cuál.es.tu.escala.socioeconómica.")
+DF <- DF %>% rename(Costo = "X.Cuál.fue.el.costo.exacto.de.tu.laptop.actual.en.soles...Ejemplo..2499.90.")
+DF <- DF %>% rename(Antigüedad = "X.Hace.cuántos.años.compraste.tu.laptop.")
+DF <- DF %>% rename(Marca = "Marca.de.tu.laptop.actual")
+DF <- DF %>% rename(Tipo = "Tipo.de.laptop.actual")
+DF <- DF %>% rename(RAM = "X.Cuál.es.la.capacidad.de.memoria.RAM.de.tu.laptop.actual.")
+DF <- DF %>% rename(`Tiempo de uso` = "X.Cuánto.tiempo.en.horas.y.minutos.crees.que.usas.tu.laptop.por.día..Puede.consultar.el.Screen.Time.de.su.dispositivo.")
+DF <- DF %>% rename(`Factor importante` = "X.Cuáles.fueron.los.factores.más.importante.para.elegir.tu.laptop.actual.")
+DF <- DF %>% rename(Publicidad = "X.Qué.tan.influenciado.estuviste.por.la.publicidad.en.redes.sociales.para.elegir.tu.laptop.actual.")
+DF <- DF %>% rename(`Sistema operativo` = "X.Qué.sistema.operativo.usas.más.")
+DF <- DF %>% rename(Satisfacción = "X.Qué.tan.satisfecho.estás.con.tu.laptop.actual.")
+
+colnames(DF)
+
+```
+
+Luego de organizar y cambiar los nombres de las columnas para un fácil manejo. Empezaremos a trabajar con las variables a utilizar en nuestro proyecto. Las cuales son: factor importante, carrera y escala. Además, para no eliminar filas innecesarias por la falta de datos. Vamos a crear un dataframe que contenga las tres variables de interés. De manear que, solo aplicaremos los criterios de limpieza de datos para las variables seleccionadas. Asimismo, para corroborar de que se atribuyeron valores en las casillas vacías. Analizaremos la cantidad de nulos iniciales por columnas.
+
+```{r}
+#Selecciono a las tres variables en otro dataframe
+DFA <- DF %>% select("Factor importante","Escala","Carrera")
+```
+
+Ahora evalúo la cantidad de datos faltantes en las columnas.
+
+```{r}
+#evaluando nulos de las tres columnas
+apply(is.na(DFA) , 2, sum)
+```
+
+Como no se encuentra ninguna celda vacía para cada una de las columnas. Se muestra que ninguna de las tres variables presentan datos faltantes. De todas maneras, se menciona que en el desarrollo de la limpieza. Es probable que tengamos que anular algunas celdas cunado se incumplan los criterios. De modo que, también se analizarán las celdas faltantes al final de la limpieza. En este sentido, se comenzarán a aplicar las restricciones de cada variable.
+
+## Análisis de variables
+
+Primero pasaremos las variables a sus respectivos tipos de variable. Esto para un estudio posterior tanto de las variable cualitativas como de las cuantitativas.
+
+```{r}
+glimpse(DF)
+```
+
+Hago que las variables cuantitativas sean del tipo double. Mientas que las cualitativas, del tipo characther.
+
+### Antigüedad
+
+```{r}
+DFP <- DF
+# La variable antiguedad debe ser un número entero. Esto debido a que se trata de una variable cuantitativa discreta.
+#veo los valores de la variable
+DF <- DFP
+table(DF$Antigüedad)
+#normalizamos los valores
+DF$Antigüedad [DF$Antigüedad=="0 (Menos de 1 año)"] <- 0
+DF$Antigüedad [DF$Antigüedad == "10 años"] <- 10
+DF$Antigüedad [DF$Antigüedad == "6 años"] <- 6
+DF$Antigüedad [DF$Antigüedad %in% c("7 años","7 años ")]<- 7
+# convertimos la variable a tipo double
+DF$Antigüedad <- as.numeric(DF$Antigüedad)
+table(DF$Antigüedad)
+# anulamos a los valores con decimales 
+DF$Antigüedad [DF$Antigüedad != round(DF$Antigüedad,0)] <- NA
+#DFP1 <- DF
+
+table(DF$Antigüedad)
+```
+
+## Edad
+
+Establecemos un rango de edades la cual solo evalúa edades entre 16 y 29. Este parámetro se establece en base a los estudios del INEI sobre la educación.
+
+```{r}
+DF <- DFP1
+#normalizamos los valores
+# table(DF$Edad,useNA = "always")
+DF$Edad [DF$Edad=="17 años"] <- 17
+DF$Edad [DF$Edad =="18j"] <- 18
+DF$Edad [DF$Edad == "19 años"] <- 19
+DF$Edad [DF$Edad == "41 años"] <- 41
+# lo pasamos a double
+DF$Edad <- as.numeric(DF$Edad)
+# table(DF$Edad,useNA = "always")
+
+#Outliers
+DF$Edad[DF$Edad %in% c(99:210,2:13)] <- NA
+# table(DF$Edad,useNA = "always")
+
+#Restricción por clasificación del INEI
+DF$Edad[DF$Edad < 16 | DF$Edad > 29] <- NA 
+# table(DF$Edad,useNA = "always")
+#DFP2 <- DF
+
+table(DFP2$Edad, useNA = "always")
+```
+
+## Costo
+
+Se encontraron datos que usaban el punto decimal como seraparador de millar por algunos estudiantes. Para corregirlo se aplico que los estudiantes que tuvieran montos menores a 7.5 pero mayores iguales a 0.5 se multiplicaran x1000.
+
+```{r}
+#DF <- DFP2
+
+# table(DF$Costo,useNA = "always")
+
+# no hay valores a normalizar
+
+#Convertimos la variable en double
+DF$Costo <- as.numeric(DF$Costo)
+
+# table(DF$Costo,useNA = "always")
+
+#Analizamos a los datos menores iguales a 10
+DF$Costo[DF$Costo < 7.5 & DF$Costo > 0.5] <- DF$Costo[DF$Costo < 7.5 & DF$Costo > 0.5] * 1000 
+# table(DF$Costo,useNA = "always")
+
+#Outliers
+DF$Costo[DF$Costo > 15000| DF$Costo < 600] <- NA
+#DFP3 <- DF
+
+summary(DF$Costo)
+```
+
+### Sexo
+
+Para la variable sexo no es necesario hacer ningún cambio. Pues no hay valores para normalizar. Asimismo, ni siquiera hay celdas vacías para esta variable.
+
+```{r}
+#DF <- DFP3 
+table(DF$Sexo,useNA = "always")
+```
+
+### Marca
+
+```{r}
+
+#DF <- DFP3
+
+#normalizamos los valores. 
+DF$Marca [DF$Marca == "Hp"] <- "HP"
+DF$Marca [DF$Marca == "Msi"] <- "MSI"
+#Para opciones exteriores a las presentadas. 
+DF$Marca [DF$Marca %in% c("Victus","victus","Vicus","ThinkPad","Otto","Hyper","imac","Solo se que es variado, mi gpu Asus.","Marca Personalizada (China)","Omen","Gigabyte")] <- "Otro"
+#Mientras que anulamos a aquellas respuestas que indican explícitamente que usan PC o que no tienen laptop. Esto porque no nos a centraremos en estos casos.
+DF$Marca [DF$Marca %in% c("No tengo","No tengo ","Teros( es una computadora)","Es pc")] <- NA
+#DFP4 <- DF
+
+table(DF$Marca,useNA = "always")
+```
+
+### Tipo
+
+Debido a que se daban alternativas y no se dió la opción para escribir, no será necesario normalizar valores. Además, como es una variable cualitativa nominal, no habrán outliers. Asimismo, al ver una distribución de los datos entre las distintas alternativas. La variable no se elimina por el criterio de variabilidad
+
+```{r}
+DF <- DFP4
+# unique(DF$Tipo)
+
+DF$Tipo[DF$Tipo == "Empresarial (Productividad y seguridad. Ej: Lenovo ThinkPad, Dell Latitude)"] = "Empresarial"
+
+DF$Tipo[DF$Tipo == "Gamer (Potentes. Ej: ASUS ROG, Acer Predator, HP Omen)"] = "Gamer"
+
+DF$Tipo[DF$Tipo == "Tradicional (Básicas estándar. Ej: HP Pavilion, Lenovo IdeaPad)"] = "Tradicional"
+
+DF$Tipo[DF$Tipo == "Ultrabook (Ligeras y delgadas. Ej: MacBook Air, Dell XPS 13, Asus ZenBook)"] = "Ultrabook"
+
+DF$Tipo[DF$Tipo == "Convertible/Desmontable (Se pueden usar también como tablet o laptop. Ej: HP Spectre x360, Lenovo Yoga, Microsoft Surface Pro)"] = "Convertible"
+
+DF$Tipo[DF$Tipo == "Orientada a diseño (Rendimiento gráfico. Ej: MacBook Pro, Microsoft Surface Laptop Studio)"] = "Orientada a diseño"
+
+
+table(DF$Tipo)
+```
+
+### RAM
+
+Se ejecuta la estandarización y limpieza de datos de la variable.
+
+```{r}
+
+
+# table(DF$RAM,useNA = "always")
+#normalizamos los valores. 
+DF$RAM[DF$RAM == "256GB"] <- 256
+DF$RAM[DF$RAM == "500GB"] <- 512
+DF$RAM[DF$RAM %in% c("475", "475 GB")] <- 512
+DF$RAM[DF$RAM == "18"] <- 18
+DF$RAM[DF$RAM %in% c("24 GB", "24 gb", "24 gb ", "24")] <- 24
+DF$RAM[DF$RAM == "245 gb"] <- 245
+DF$RAM[DF$RAM == "6GB"] <- 6
+DF$RAM[DF$RAM == "4 GB"] <- 4
+DF$RAM[DF$RAM == "8 GB"] <- 8
+DF$RAM[DF$RAM == "12 GB"] <- 12
+DF$RAM[DF$RAM == "16 GB"] <- 16
+DF$RAM[DF$RAM == "20"] <- 20
+DF$RAM[DF$RAM == "32 GB"] <- 32
+DF$RAM[DF$RAM == "36 GB"] <- 36
+DF$RAM[DF$RAM == "64 GB"] <- 64
+DF$RAM[DF$RAM == "1 T"] <- 1000
+DF$RAM[DF$RAM == "190"] <- 190
+DF$RAM[DF$RAM == "Sin ninguna modificación 16GB"] <- 16
+DF$RAM[DF$RAM == "En mi pc tengo 4gb"] <- 4
+
+DF$RAM[DF$RAM %in% c("no se", "No sé", "No sé ", "No estoy seguro", "No lo se", "No sé la verdad ", 
+                     "No tengo ", "Nose ")] <- NA
+
+# Valores inninterpretables
+DF$RAM[DF$RAM == "200T"] <- NA
+
+
+# Convertimos finalmente la columna a tipo numérico (cuantitativo discreto)
+DF$RAM <- as.integer(DF$RAM)
+
+table(DF$RAM,useNA = "always")
+
+#DFP4 <- DF
+```
+
+## Tiempo de uso
+
+```{r}
+
+DFP5 <- DF
+
+library(lubridate)
+
+DF$"Tiempo de uso" = hms(DF$"Tiempo de uso")
+
+DF$"Tiempo de uso" = as.numeric(DF$"Tiempo de uso") / 3600
+
+DF$"Tiempo de uso" = round(DF$"Tiempo de uso", 4)
+
+head(DF)
+summary(DF$`Tiempo de uso`)
+
+```
+
+## Satisfacción
+
+Como la pregunta "Satisfacción" fue hecha con respuestas predeterminadas, no es necesario estandarizar respuestas, únicamente debemos convertir la columna a una columna de datos caraterísticos ordinales; por la misma razón es que en la columna no hay NA's.
+
+```{r}
+#DFP5 <- DF
+DF$Satisfacción <- factor(DF$Satisfacción,
+                     levels = c("Muy insatisfecho",
+                                "Poco satisfecho",
+                                "Neutral",
+                                "Algo satisfecho",
+                                "Súper satisfecho"),
+
+                     ordered = TRUE)
+# DF <- DFP5
+head(DF)
+```
+
+## Publicidad
+
+Como la pregunta "Publicidad" fue hecha con respuestas predeterminadas, no es necesario estandarizar respuestas, únicamente debemos convertir la columna a una columna de datos característicos ordinales; por la misma razón es que en la columna no hay NA's.
+
+```{r}
+#DFP7 <- DF
+DF$Publicidad <- factor(DF$Publicidad,
+                     levels = c("Nada influenciado",
+                                "Poco influenciado",
+                                "Neutral",
+                                "Algo Influenciado",
+                                "Muy influenciado"),
+                     ordered = TRUE)
+
+head(DF)
+# DF <- DFP7
+```
+
+## Estandarización de nuestras variables de estudio
+
+Creamos una tabla donde guardaremos la tabla normalizada
+
+```{r}
+DF_Normalizado <- DF
+```
+
+## Carrera
+
+Ver todos los datos de la Carrera del estudiante
+
+```{r}
+unique(DF_Normalizado$Carrera)
+```
+
+Como es una variable descriptiva nominal. Lo clasificaremos mediante una tabla.
+
+Para clasificarlos usaremos la clasificación de campos académicos (`UNESCO ISCED-F 2013)`.
+
+`Referencia: UNESCO Institute for Statistics (2015). ISCED Fields of Education and Training 2013 (ISCED-F 2013).`
+
+| Código | Área                                               |
+|--------|----------------------------------------------------|
+| 01     | Educación                                          |
+| 02     | Artes y Humanidades                                |
+| 03     | Ciencias Sociales, Periodismo e Información        |
+| 04     | Administración y Derecho                           |
+| 05     | Ciencias Naturales, Matemáticas y Estadística      |
+| 06     | Tecnologías de la Información y Comunicación (TIC) |
+| 07     | Ingeniería, Industria y Construcción               |
+| 08     | Agricultura, Silvicultura, Pesca y Veterinaria     |
+| 09     | Salud y Bienestar                                  |
+| 10     | Servicios (como Turismo, Hotelería)                |
+
+Para nuestro caso en particular se propone:
+
+| Dato original | Categoría ISCED recomendada |
+|------------------------------------|------------------------------------|
+| Ingeniería | 07 Ingeniería, Industria y Construcción |
+| Computación | 06 Tecnologías de la Información y Comunicación (TIC) |
+| Ciencias Económicas y Empresariales | 04 Administración y Derecho |
+| Agronomía y Ciencias Veterinarias | 08 Agricultura, Silvicultura, Pesca y Veterinaria |
+| Ciencias Sociales | 03 Ciencias Sociales, Periodismo e Información |
+| Derecho y Ciencias Jurídicas | 04 Administración y Derecho |
+| Ciencias Naturales o Biológicas | 05 Ciencias Naturales, Matemáticas y Estadística |
+| Humanidades o Letras | 02 Artes y Humanidades |
+| Educación | 01 Educación |
+| Ciencias de la Salud | 09 Salud y Bienestar |
+| Artes | 02 Artes y Humanidades |
+| Turismo, Hotelería y Gastronomía | 10 Servicios |
+| Ciencias Exactas o Físicas | 05 Ciencias Naturales, Matemáticas y Estadística |
+| Matemáticas Puras o Aplicadas | 05 Ciencias Naturales, Matemáticas y Estadística |
+| Defensa, Seguridad y Ciencias Militares | 07 Ingeniería, Industria y Construcción (*puede variar*) |
+| Arquitectura | 07 Ingeniería, Industria y Construcción |
+| Transporte y Logística | 10 Servicios |
+
+Codigo que realiza tal mapeo:
+
+```{r}
+# Mapeo de carreras
+# Cargar tidyverse para manejo de datos
+library(tidyverse)
+
+# Crear tabla de mapeo
+mapeo_carreras <- tibble(
+  carrera_original = c(
+    "Ingeniería",
+    "Computación",
+    "Ciencias Económicas y Empresariales",
+    "Agronomía y Ciencias Veterinarias",
+    "Ciencias Sociales",
+    "Derecho y Ciencias Jurídicas",
+    "Ciencias Naturales o Biológicas",
+    "Humanidades o Letras",
+    "Educación",
+    "Ciencias de la Salud",
+    "Artes",
+    "Turismo, Hotelería y Gastronomía",
+    "Ciencias Exactas o Físicas",
+    "Matemáticas Puras o Aplicadas",
+    "Defensa, Seguridad y Ciencias Militares",
+    "Arquitectura",
+    "Transporte y Logística"
+  ),
+  categoria_ISCED = c(
+    "Ingeniería, Industria y Construcción",
+    "Tecnologías de la Información y Comunicación (TIC)",
+    "Administración y Derecho",
+    "Agricultura, Silvicultura, Pesca y Veterinaria",
+    "Ciencias Sociales, Periodismo e Información",
+    "Administración y Derecho",
+    "Ciencias Naturales, Matemáticas y Estadística",
+    "Artes y Humanidades",
+    "Educación",
+    "Salud y Bienestar",
+    "Artes y Humanidades",
+    "Servicios",
+    "Ciencias Naturales, Matemáticas y Estadística",
+    "Ciencias Naturales, Matemáticas y Estadística",
+    "Ingeniería, Industria y Construcción",
+    "Ingeniería, Industria y Construcción",
+    "Servicios"
+  )
+)
+
+```
+
+Normalizando la columna "Carrera"
+
+```{r}
+DF_Normalizado <- DF %>%
+  left_join(mapeo_carreras, by = c("Carrera" = "carrera_original")) %>%
+  mutate(Carrera = categoria_ISCED) %>%
+  select(-categoria_ISCED)
+
+DF_Normalizado
+```
+
+## Escala
+
+Para el manejo de esta variable. Nos basamos en los datos del INEI para definir las cinco escalas de la distribución socioeconómica en el Perú.
+
+![](images/clipboard-2388945945.png)
+
+Ver todos los datos de la Escala del estudiante.
+
+```{r}
+unique(DF_Normalizado$Escala)
+```
+
+Como es una variable descriptiva ordinal, podemos asignar un criterio de orden a la escala, para ello, tomaremos el siguiente criterio:
+
+$$
+\text{E} < \text{D} < \text{C} < \text{B} < \text{A}
+$$
+
+Con este código hacemos que los datos de la columna `Escala` de `DF_Normalizado` tengan un orden. A este dato se le llama `ordered factor`.
+
+```{r}
+DF_Normalizado$Escala <- factor(DF_Normalizado$Escala,
+                                      levels = c("E", "D", "C", "B", "A"),
+                                      ordered = TRUE)
+```
+
+## Factor Importante
+
+Para normalizar esto vamos a utilizar funciones de manipulación de texto y aplicando un proceso de estandarización.
+
+```{r}
+library(stringi)
+library(tidyverse)
+
+DF_Normalizado$`Factor importante` <- DF_Normalizado$`Factor importante` %>%
+  str_split(",") %>%                 # Separar por comas
+  lapply(str_trim) %>%               # Eliminar espacios extra
+  lapply(tolower) %>%                # Convertir a minúsculas
+  lapply(stri_trans_general, "Latin-ASCII")  # Elimina acentos
+
+
+table(is.na(DF_Normalizado))
+# Ver la tabla de frecuencia (esto se aplicará por cada lista de criterios)
+table(unlist(DF_Normalizado$`Factor importante`))
+
+# Mostrar la tabla con los datos actualizados
+head(DF_Normalizado)
+```
+
+## Aplicando Criterios
+
+Empezaremos por manejar los datos de la columna "Factor importante". Dentro de esta, observamos que, además de las ya establecidas, hay diversas respuestas que entran dentro de la categoría de *Otro*
+
+Primero, hacemos una copia de la columna "Factor importante" de DF_Normalizado y la almacenamos en otra tabla.
+
+```{r}
+
+DF_FactorImportante <- DF_Normalizado %>%
+  select(`Factor importante`)
+
+```
+
+Luego filtramos los valores válidos.
+
+```{r}
+valores_validos <- c(
+  "precio", 
+  "oferta",
+  "marca",
+  "recomendacion",
+  "rendimiento",
+  "portabilidad",
+ "estética"
+)
+```
+
+Una vez seleccionados los valores válidos, lo que haremos es convertir los elementos de cada fila (que están ordenados como una lista, ej: marca,precio,portabilidad) en TRUE o FALSE si es que están o no en el vector valores_validos. En el caso que el elemento no esté en valores_validos, se convierte en TRUE y es su valor es reemplazado por "otro".
+
+```{r}
+DF_FactorImportante$`Factor importante` <- sapply(DF_FactorImportante$`Factor importante`, function(x) {
+  items <- unlist(strsplit(x, ";"))
+  items <- trimws(items)
+  items[!tolower(items) %in% valores_validos] <- "otro"
+  paste(unique(items), collapse = ";")
+})
+```
+
+```{r}
+library(stringr)
+library(dplyr)
+
+DF_FactorImportante$`Factor importante` <- sapply(DF_FactorImportante$`Factor importante`, paste, collapse = ", ")
+
+
+# Vector con las palabras clave
+palabras_clave <- c("marca", "otro", "recomendacion", "portabilidad", "rendimiento", "oferta", "precio")
+
+# Contar la frecuencia de cada palabra clave
+conteos <- sapply(palabras_clave, function(palabra) str_count(todo_texto, palabra))
+
+# Crear tabla de resultados
+tabla_resultado <- data.frame(
+  Frecuencia = conteos
+)
+tabla_resultado
+```
+
+Reemplazamos la columna "Factor Importante" limpia en DF_Normalizado.
+
+```{r}
+DF_Normalizado$`Factor importante` <- DF_FactorImportante$`Factor importante`
+```
+
+Ahora, nos quedaremos con los casos completos, también considerada "Obervaciones válidas".
+
+```{r}
+
+unique(DF_Efectivo)
+
+# Quedarnos con filas que en ciertas columnas no tengan NA's
+
+DF_Efectivo <- DF_Normalizado[
+  complete.cases(DF[, c("Edad")]), 
+  ]
+
+```
+
+Proseguiremos a crear un nuevo DataFrame unicamente con las variables que utilizaremos:
+
+-   Factor Importante
+
+-   Escala
+
+-   Carrera
+
+```{r}
+DF_Variables <- select(
+  DF_Efectivo,
+  "Factor importante",
+  "Escala",
+  "Carrera"
+)
+DF_Variables
+```
+
+Pasamos todos los datos a minúsculas.
+
+```{r}
+DF_Variables <- DF_Variables %>% mutate(across(everything(), tolower))
+DF_Variables
+```
+
+## Outliers y Variabilidad
+
+Como solo vamos a trabajar con variables categóricas. No vamos a encontrar valores atípicos o extremos, como podría pasar con las variables de edad o tiempo de uso diario, en ellos. Pues los alumnos tenían que elegir entre las alternativas planteadas. Excepto en el caso de la variable del factor de mayor importancia donde tenían la opción de escribir dentro de la casilla otros. Los cuales se agruparon dentro de un grupo como se mostró anteriormente. En este sentido, no hay outliers para nuestra base de datos (la formada por las tres variables) a utilizar.
+
+Por el otro lado, respecto a la variabilidad, se muestra que los valores de las variables presentan una distribución heterogénea entre las alternativas presentadas.
+
+Análisis de la variable escala:
+
+```{r}
+table(DF_Variables$"Escala")
+```
+
+Se muestra que no hay una distribución heterogénea. De manera que, la variable no se eliminaría por este criterio. A continuación se analiza la variable carrera.
+
+```{r}
+table(DF_Variables$Carrera)
+```
+
+De igual manera en comparación con la escala. La variable de carrera presenta una distribución heterogénea. De manera que, tampoco se eliminaría bajo este criterio.
+
+```{r}
+
+
+library(stringr)
+library(dplyr)
+
+# table(DF_Variables$"Factor importante")
+#se elaborará un código para la frencuencia de cada factor
+palabras_clave <- c("marca", "otro", "recomendacion", "portabilidad", "rendimiento", "oferta", "precio")
+# Lista para guardar todas las palabras encontradas
+lista <- c()
+
+library(stringr)
+library(dplyr)
+
+# Vector con las palabras clave
+palabras_clave <- c("marca", "otro", "recomendacion", "portabilidad", "rendimiento", "oferta", "precio")
+
+# Convertir todo el texto en una sola cadena para facilitar el conteo
+todo_texto <- tolower(paste(DF_Variables$`Factor importante`, collapse = ", "))
+
+# Contar la frecuencia de cada palabra clave
+conteos <- sapply(palabras_clave, function(palabra) str_count(todo_texto, palabra))
+
+
+
+# Mostrar tabla ordenada por frecuencia
+tabla_resultado <- arrange(tabla_resultado, desc(Frecuencia))
+print(tabla_resultado)
+```
+
+En este caso se observa una variedad de posibilidades. Esto debido a que los estudiantes podían marcar más de una alternativa. De igual manera, se observa una distribución heterogénea de los datos. Por este motivo. Esta variable tampoco se eliminaría por este criterio.
+
+Esto aplicable tanto para cada una de las tres variables utilizadas. En este sentido, se observa que tampoco será necesario eliminar algunas de las tres variables por el criterio de la variabilidad de datos.
+
+## Manejo de nulos
+
+En el sentido de que vamos a trabajar solo con las tres variables mencionadas. Solo eliminamos las filas incompletas de variables que determinaban a la muestra seleccionada. Tales como la edad. De manera que, para el análisis de nulos. Solo evaluaremos los nulos de las tres variables. De manera que, después de aplicar los criterios y trabajar con la base de datos. Empezaremos a trabajar con la gestión de nulos. Para ello observaremos la cantidad de celdas vacías de cada uno de las tres columnas utilizadas.
+
+```{r}
+#evaluando nulos de las tres columnas
+apply(is.na(DF_Variables) , 2, sum)
+```
+
+Como se muestra. La base de datos formada por las tres variables no presenta ninguna celda vacía. Por lo que no sería necesario hacer algún cambio al respecto.
+
+## Gestión de variables:
+
+| Variables     | Tipo                  |
+|---------------|-----------------------|
+| Antigüedad    | Cuantitativa continua |
+| Edad          | Cuantitativa discreta |
+| Costo         | Cuantitativa continua |
+| Sexo          | Cualitativa discreta  |
+| Marca         | Cualitativa discreta  |
+| Tipo          | Cualitativa discreta  |
+| RAM           | Cuantitativa discreta |
+| Tiempo de uso | Cuantitativa continua |
+| Satisfacción  | Cualitativa discreta  |
+| Publicidad    | Cualitativa discreta  |
+
+## Presentación de la tabla final
+
+De este modo, se aplicaron todos los criterios para limpiar la base de datos de nuestro estudio. De manera que, se organizaron y normalizaron los datos. Para luego aplicar los criterios y analizar los datos mediante la variabilidad y la gestión de nulos. Esto para finalmente proporcionar una tabla limpia. Sin casillas faltantes ni casos incompletos.
+
+```{r}
+head(DF_Variables)
+DF_Variables
+apply(is.na(DF_Variables),2,sum)
+DF_Efectivo
+```
+
+agregar una columna que cuente los NA por observación\
+establecer un porcentaje
+
+dividir el factor importante en columnas

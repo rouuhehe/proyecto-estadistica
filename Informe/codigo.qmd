@@ -1,0 +1,367 @@
+---
+title: "go"
+format: html
+editor: visual
+---
+
+```{r}
+library(dplyr)
+library(readr)
+
+DFO <- read.csv("Tendencias y factores.csv")
+
+# DFO
+
+DF <- DFO
+DF <- DFO[, -c(1,2,4,18:147,164:175)]
+# DF
+DF <- DF[,-c(15,17)]
+# DF
+
+# names(DF)
+# glimpse(DF)
+
+
+DF <- rename(DF,
+             "Carrera" = "Área.de.la.carrera.que.estudias",
+             "Costo"="X.Cuál.fue.el.costo.exacto.de.tu.laptop.actual.en.soles...Ejemplo..2499.90.",
+             "Escala" = "X.Cuál.es.tu.escala.socioeconómica.",
+             "Antigüedad" = "X.Hace.cuántos.años.compraste.tu.laptop."  ,
+             "Marca" = "Marca.de.tu.laptop.actual" ,
+             "Tipo" = "Tipo.de.laptop.actual" ,
+             "RAM" = "X.Cuál.es.la.capacidad.de.memoria.RAM.de.tu.laptop.actual.",
+             "Tiempo de uso" ="X.Cuánto.tiempo.en.horas.y.minutos.crees.que.usas.tu.laptop.por.día..Puede.consultar.el.Screen.Time.de.su.dispositivo." ,
+             "Factor importante" = "X.Cuál.fue.el.factor.más.importante.para.elegir.tu.laptop.actual." ,
+             "Publicidad" = "X.Qué.tan.influenciado.estuviste.por.la.publicidad.en.redes.sociales.para.elegir.tu.laptop.actual."  ,
+             "Sistema operativo" = "X.Qué.sistema.operativo.usas." ,
+             "Edad 2" = "Edad.9",
+  "Sexo 2" = "Sexo.9",
+              "Carrera 2" = "Área.de.la.carrera.que.estudias.9", 
+  "Escala 2" = "X.Cuál.es.tu.escala.socioeconómica..9",
+  "Costo 2" = "X.Cuál.fue.el.costo.exacto.de.tu.laptop.actual.en.soles...Ejemplo..2499.90..9",
+
+  "Antigüedad 2" = "X.Hace.cuántos.años.compraste.tu.laptop..9",
+  "Marca 2" = "Marca.de.tu.laptop.actual.9",
+  "Tipo 2" = "Tipo.de.laptop.actual.9",
+  "RAM 2" = "X.Cuál.es.la.capacidad.de.memoria.RAM.de.tu.laptop.actual..9",
+  "Tiempo de uso 2" = "X.Cuánto.tiempo.en.horas.y.minutos.crees.que.usas.tu.laptop.por.día..Puede.consultar.el.Screen.Time.de.su.dispositivo..9",
+  "Factor importante 2" = "X.Cuáles.fueron.los.factores.más.importante.para.elegir.tu.laptop.actual.",
+  "Publicidad 2" = "X.Qué.tan.influenciado.estuviste.por.la.publicidad.en.redes.sociales.para.elegir.tu.laptop.actual..9",
+  "Sistema operativo 2" = "X.Qué.sistema.operativo.usas.más.",
+  "Satisfacción" =  "X.Qué.tan.satisfecho.estás.con.tu.laptop.actual."    ,
+  "Satisfacción 2" = "X.Qué.tan.satisfecho.estás.con.tu.laptop.actual..9"  
+  
+  )
+
+
+
+
+
+# Lista de nombres base para las columnas que deben fusionarse
+cabeceras_repetidas <- c(
+  "Sexo",
+  "Edad",
+  "Carrera",
+  "Escala",
+  "Costo",
+  "Antigüedad",
+  "Marca",
+  "Tipo",
+  "RAM",
+  "Tiempo de uso",
+  "Factor importante",
+  "Publicidad",
+  "Sistema operativo",
+  "Satisfacción"
+)
+
+
+
+DF <- DF %>% mutate(across(everything(), as.character))
+
+
+
+for (nombre in cabeceras_repetidas) {
+  
+  columnas_similares <- DF %>% select(starts_with(nombre))
+  
+  DF[[nombre]] <- apply(columnas_similares, 1, function(x) {
+    primero_valido <- x[!is.na(x) & x != ""][1]
+    if (is.null(primero_valido)) NA else primero_valido
+  })
+  
+  # DF <- DF %>% select(-all_of(names(columnas_similares)))
+}
+
+
+
+# Eliminando columnas ineecesarias
+
+DF <- DF[,-c(15:40)]
+
+
+
+# Ver el resultado
+head(DF)
+
+# Guardar el archivo final
+write_csv(DF, "Sin ColumnasInnecesariasYRenombradas.csv")
+
+# Mostras encabezados
+str(DF)
+
+```
+
+### Estandarizar (normalizar) respuestas
+
+Creamos una tabla donde guardaremos la tabla normalizada
+
+```{r}
+DF_Normalizado <- DF
+```
+
+#### Columna "Carrera"
+
+Ver todos los datos de la Carrera del estudiante
+
+```{r}
+unique(DF_Normalizado$Carrera)
+```
+
+Como es una variable descriptiva nominal clasificaremos mediante una tabla.
+
+Para clasificarlos usaremos la clasificación de campos académicos `UNESCO ISCED-F 2013`.
+
+`Referencia: UNESCO Institute for Statistics (2015). ISCED Fields of Education and Training 2013 (ISCED-F 2013).`
+
+| Código | Área                                               |
+|--------|----------------------------------------------------|
+| 01     | Educación                                          |
+| 02     | Artes y Humanidades                                |
+| 03     | Ciencias Sociales, Periodismo e Información        |
+| 04     | Administración y Derecho                           |
+| 05     | Ciencias Naturales, Matemáticas y Estadística      |
+| 06     | Tecnologías de la Información y Comunicación (TIC) |
+| 07     | Ingeniería, Industria y Construcción               |
+| 08     | Agricultura, Silvicultura, Pesca y Veterinaria     |
+| 09     | Salud y Bienestar                                  |
+| 10     | Servicios (como Turismo, Hotelería)                |
+
+Para nuestro caso en particular se propone:
+
+| Dato original | Categoría ISCED recomendada |
+|----|----|
+| Ingeniería | 07 Ingeniería, Industria y Construcción |
+| Computación | 06 Tecnologías de la Información y Comunicación (TIC) |
+| Ciencias Económicas y Empresariales | 04 Administración y Derecho |
+| Agronomía y Ciencias Veterinarias | 08 Agricultura, Silvicultura, Pesca y Veterinaria |
+| Ciencias Sociales | 03 Ciencias Sociales, Periodismo e Información |
+| Derecho y Ciencias Jurídicas | 04 Administración y Derecho |
+| Ciencias Naturales o Biológicas | 05 Ciencias Naturales, Matemáticas y Estadística |
+| Humanidades o Letras | 02 Artes y Humanidades |
+| Educación | 01 Educación |
+| Ciencias de la Salud | 09 Salud y Bienestar |
+| Artes | 02 Artes y Humanidades |
+| Turismo, Hotelería y Gastronomía | 10 Servicios |
+| Ciencias Exactas o Físicas | 05 Ciencias Naturales, Matemáticas y Estadística |
+| Matemáticas Puras o Aplicadas | 05 Ciencias Naturales, Matemáticas y Estadística |
+| Defensa, Seguridad y Ciencias Militares | 07 Ingeniería, Industria y Construcción (*puede variar*) |
+| Arquitectura | 07 Ingeniería, Industria y Construcción |
+| Transporte y Logística | 10 Servicios |
+
+Codigo que realiza tal mapeo:
+
+```{r}
+library(tidyverse)
+
+# Mapeo de carreras
+# Cargar tidyverse para manejo de datos
+library(tidyverse)
+
+# Crear tabla de mapeo
+mapeo_carreras <- tibble(
+  carrera_original = c(
+    "Ingeniería",
+    "Computación",
+    "Ciencias Económicas y Empresariales",
+    "Agronomía y Ciencias Veterinarias",
+    "Ciencias Sociales",
+    "Derecho y Ciencias Jurídicas",
+    "Ciencias Naturales o Biológicas",
+    "Humanidades o Letras",
+    "Educación",
+    "Ciencias de la Salud",
+    "Artes",
+    "Turismo, Hotelería y Gastronomía",
+    "Ciencias Exactas o Físicas",
+    "Matemáticas Puras o Aplicadas",
+    "Defensa, Seguridad y Ciencias Militares",
+    "Arquitectura",
+    "Transporte y Logística"
+  ),
+  categoria_ISCED = c(
+    "Ingeniería, Industria y Construcción",
+    "Tecnologías de la Información y Comunicación (TIC)",
+    "Administración y Derecho",
+    "Agricultura, Silvicultura, Pesca y Veterinaria",
+    "Ciencias Sociales, Periodismo e Información",
+    "Administración y Derecho",
+    "Ciencias Naturales, Matemáticas y Estadística",
+    "Artes y Humanidades",
+    "Educación",
+    "Salud y Bienestar",
+    "Artes y Humanidades",
+    "Servicios",
+    "Ciencias Naturales, Matemáticas y Estadística",
+    "Ciencias Naturales, Matemáticas y Estadística",
+    "Ingeniería, Industria y Construcción",
+    "Ingeniería, Industria y Construcción",
+    "Servicios"
+  )
+)
+
+```
+
+Normalizando la columna "Carrera"
+
+```{r}
+DF_Normalizado <- DF %>%
+  left_join(mapeo_carreras, by = c("Carrera" = "carrera_original")) %>%
+  mutate(Carrera = categoria_ISCED) %>%
+  select(-categoria_ISCED)
+
+DF_Normalizado
+```
+
+#### Columna "Escala"
+
+Ver todos los datos de la Escala del estudiante
+
+```{r}
+unique(DF_Normalizado$Escala)
+```
+
+Como es una variable descriptiva ordinal, podemos asignar un criterio de orden a la escala, para ello, tomaremos el siguiente criterio:
+
+$$
+\text{E} < \text{D} < \text{C} < \text{B} < \text{A}
+$$
+
+Con este código hacemos que los datos de la columna `Escala` de `DF_Normalizado` tengan un orden. A este dato se le llama `ordered factor`.
+
+```{r}
+DF_Normalizado$Escala <- factor(DF_Normalizado$Escala,
+                                      levels = c("E", "D", "C", "B", "A"),
+                                      ordered = TRUE)
+
+# Ejemplo con la moda
+which.max(table(DF_Normalizado$Escala))
+
+# Ejemplo con la mediana
+median(as.numeric(DF_Normalizado$Escala))
+```
+
+Esto está diciendo que la categoría C es la más frecuente, y su posición en el vector de categorías es 3 (porque en la lista \["E", "D", "C", "B", "A"\] C es la tercera).
+
+#### Columna "Factor Importante"
+
+Ver todos los datos de Factor Importante
+
+```{r}
+unique(DF_Normalizado$`Factor importante`)
+```
+
+Para normalizar esto vamos a utilizar funciones de manipulación de texto y aplicando un proceso de estandarización.
+
+```{r}
+library(stringi)
+library(tidyverse)
+
+DF_Normalizado$`Factor importante` <- DF_Normalizado$`Factor importante` %>%
+  str_split(",") %>%                 # Separar por comas
+  lapply(str_trim) %>%               # Eliminar espacios extra
+  lapply(tolower) %>%                # Convertir a minúsculas
+  lapply(stri_trans_general, "Latin-ASCII")  # Elimina acentos
+
+
+# Ver los valores únicos de la nueva columna
+unique(DF_Normalizado$`Factor importante`)
+
+# Ver la tabla de frecuencia (esto se aplicará por cada lista de criterios)
+table(unlist(DF_Normalizado$`Factor importante`))
+
+# Mostrar la tabla con los datos actualizados
+head(DF_Normalizado)
+```
+
+## Aplicando Criterios
+
+Empezaremos por manejar los datos de la columna "Factor importante". Dentro de esta, observamos que, además de las ya establecidas, hay diversas respuestas que entran dentro de la categoría de *Otro*
+
+Primero, hacemos una copia de la columna "Factor importante" de DF_Normalizado y la almacenamos en otra tabla.
+
+```{r}
+
+DF_FactorImportante <- DF_Normalizado %>%
+  select(`Factor importante`)
+
+```
+
+Luego filtramos los valores válidos.
+
+```{r}
+valores_validos <- c(
+  "precio", 
+  "oferta",
+  "marca",
+  "recomendacion",
+  "rendimiento",
+  "portabilidad",
+ "estética"
+)
+```
+
+Una vez seleccionados los valores válidos, lo que haremos es convertir los elementos de cada fila (que están ordenados como una lista, ej: marca,precio,portabilidad) en TRUEo FALSE si es que están o no en el vector valores_validos. En el caso que el elemento no esté en valores_validos, se convierte en TRUE y es su valor es reemplazado por "otro".
+
+```{r}
+DF_FactorImportante$`Factor importante` <- lapply(DF_FactorImportante$`Factor importante`, function(x) {
+  x[!x %in% valores_validos] <- "otro"
+  unique(x)  # evitar duplicados
+})
+```
+
+```{r}
+DF_FactorImportante$`Factor importante` <- sapply(DF_FactorImportante$`Factor importante`, paste, collapse = ", ")
+DF_FactorImportante
+```
+
+Reemplazamos la columna "Factor Importante" limpia en DF_Normalizado.
+
+```{r}
+DF_Normalizado$`Factor importante` <- DF_FactorImportante$`Factor importante`
+```
+
+Proseguiremos a crear un nuevo DataFrame unicamente con las variables que utilizaremos:
+
+-   Factor Importante
+
+-   Escala
+
+-   Carrera
+
+```{r}
+DF_Variables <- select(
+  DF_Normalizado,
+  "Factor importante",
+  "Escala",
+  "Carrera"
+)
+DF_Variables
+```
+
+Pasamos todos los datos a minúsculas.
+
+```{r}
+DF_Variables <- DF_Variables %>% mutate(across(everything(), tolower))
+DF_Variables
+```

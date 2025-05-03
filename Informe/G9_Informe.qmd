@@ -1,0 +1,282 @@
+---
+title: "Tendencias y factores clave en la compra de laptops por estudiantes universitarios en Lima Metropolitana."
+author:
+  - Yaritza Milagros López Rojas
+  - Carlos Alberto Zavalaga Hilasaca
+  - Sydni Samina Sánchez León
+  - Gerardo Alair Angulo Huanca
+  - Paulo Isael Miranda Barrientos
+lang: es
+format:
+  html:
+    toc: true
+    toc-location: right
+    number-sections: true
+    theme: cosmo
+    fontsize: 1.1em
+    code-fold: true
+editor: visual
+---
+
+# Introducción
+
+## Relevancia
+
+Conocer las tendencias y procesos detrás de la decisión de compra de laptops de estudiantes universitarios es importante tanto para el sector comercial, por las oportunidades de mercado, como para los estudiantes. Pues su objetivo es elegir una laptop que responda a las exigencias y competencias académicas. Este estudio se centra en recolectar y analizar la relación entre factores clave que influyen en la compra de laptops por parte de estudiantes universitarios de Lima Metropolitana. De esta manera, se logrará no solo identificar patrones de consumo, sino también servirá de guía para futuros compradores.
+
+## Objetivos:
+### Objetivo General:
+
+Identificar las principales tendencias y factores que, en 2025, influyen en la elección de laptops por parte de los estudiantes, tomando en cuenta sus necesidades y preferencias tecnológicas.
+
+### Objetivos Específicos:
+
+-   Explorar la relación entre la carrera del estudiante y el factor de mayor importancia en la elección de laptops por parte de los estudiantes.
+
+-   Analizar la relación entre el factor de mayor importancia en el momento de la elección de laptops y la escala socioeconómica de los alumnos.
+
+## Contexto:
+
+Con el pasar de los años, la tecnología ha evolucionado significativamente, introduciendo nuevas marcas y modelos de laptops que han marcado un antes y después en el mercado. Este suceso ha generado una gran cantidad de información relacionada con estos dispositivos, lo que ha hecho que, para muchos estudiantes universitarios, la elección de una laptop se convierta en una decisión compleja. Diversos factores influyen en este proceso, por lo que los estudiantes deben investigar distintas fuentes para encontrar una opción que se adecúe a sus necesidades académicas y personales.
+
+## Planificación:
+
+Se utilizó un *diagrama de Gantt* para la repartición y organización de los diferentes pasos del proyecto.
+
+```{r, , message=FALSE, warning=FALSE, echo=TRUE}
+#install.packages("ggplot2)
+#install.packages("tidyr")
+#install.packages("lubridate")
+library(ggplot2)
+library(tidyr)
+library(lubridate)
+library(dplyr)
+library(readr)
+
+today <- Sys.Date()
+diagrama <- read.csv("Diagrama de gantt - Hoja 1 (3).csv") 
+diagrama$Start <- paste(diagrama$Start,"/2025") 
+diagrama$End <- paste(diagrama$End,"/2025") 
+diagrama$Start <- dmy(diagrama$Start) 
+diagrama$End <- dmy(diagrama$End) 
+
+for (i in 1:nrow(diagrama)) {
+  if (diagrama$End[i] < today) {
+    diagrama$Completado[i] <- "Verdadero"
+  } else {
+    diagrama$Completado[i] <- "Falso"
+  }
+}
+orden_etapas <- c()
+for (i in 1:nrow(diagrama)) {
+  orden_etapas[i]<- diagrama$Etapa[i]
+}
+orden_etapas <- rev(orden_etapas)
+
+df <- diagrama
+
+df.melt <- df %>%
+  tidyr::pivot_longer(col = c(Start, End))
+
+df.melt$Etapa <- factor(df.melt$Etapa, levels = orden_etapas)
+
+p1 <- ggplot(df.melt, aes(x = value, y = Etapa, colour = Completado))
+p1 <- p1 + geom_line(alpha = 0.5, linewidth = 7)
+p1 <- p1 + labs(title = "Diagrama de Gantt")
+p1 <- p1 + labs(x = "Fecha")
+p1 <- p1 + geom_vline(xintercept = today, color = "gray", linewidth = 2, alpha = 0.5)
+
+p1
+
+```
+
+# Datos
+
+## Población objetivo:
+
+### Población:
+
+Estudiantes universitarios de Lima Metropolitana que poseen una laptop.
+
+### Muestra:
+
+1800 estudiantes de distintas universidades de Lima Metropolitana que cuentan con una laptop.
+
+### Tipo de muestreo:
+
+**Muestreo no probabilístico por conveniencia**, puesto a que la muestra fue realizada por los integrantes del grupo a personas dentro de su círculo social.
+
+## Recolección de datos:
+
+Se realizó una encuesta por Google Forms a estudiantes de diversas carreras en distintas universidades de Lima Metropolitana. 
+
+## Variables:
+
+| *Variable* | *Tipo* | *Descripción* | *Restricciones* |
+|------------------|------------------|------------------|------------------|
+| Edad | Cuantitativa discreta | Edad en años del estudiante encuestado. | Es un número entero mayor igual a 16 y menor igual a 29 |
+| Antigüedad | Cuantitativa discreta | Número de años que pasaron desde la laptop. | Es un número entero no negativo. |
+| RAM | Cuantitativa discreta | Capacidad de la RAM medida en GB. | Es un número entero no negativos. |
+| Costo | Cuantitativa continua | Precio de la laptop en moneda local. | Número no negativo |
+| Tiempo de uso | Cuantitativa continua | Tiempo en horas de uso diario. | Número no negativo |
+| Marca | Cualitativa nominal | Marca de la laptop adquirida. | Ejemplo: HP, Dell, Lenovo, Apple y otros. |
+| Sexo | Cualitativa nominal | Sexo del estudiante. | Deber ser o Masculino o Femenino |
+| Tipo | Cualitativa nominal | Clasificación según diseño o funcionalidad. | Las mencionadas en las alternativas: Ultrabook, Gamer y otros. |
+| Carrera | Cualitativa nominal | Área de la cual pertenece la carrera del estudiante. | Las mencionadas en las alternativas: Ingeniería, Ciencias y otros. |
+| Factor importante | Cualitativa nominal | Criterio principal en la decisión de compra. | Las mencionadas en las alternativas: precio, marca, diseño y otros. |
+| Sistema operativo | Cualitativa nominal | Sistema operativo instalado. | Las mencionadas en las alternativas. Ejemplo: Windows, macOS, y otros. |
+| Publicidad | Cualitativa ordinal | Percepción sobre la influencia de la publicidad en la compra. | Cinco grados desde muy influenciado a muy influenciado. |
+| Satisfacción | Cualitativa ordinal | Grado de satisfacción del estudiante respecto a la laptop. | Cinco grados desde muy satisfecho a muy insatisfecho. |
+| Escala | Cualitativa ordinal | Información socioeconómica del estudiante. | Desde la A hasta la E de acuerdo a lo establecido por el INEI. |
+
+# Limpieza de datos 
+
+## Normalización 
+
+Durante esta etapa se realizaron ajustes para unificar el formato y la estructura de los datos. Un caso importante fue la detección de columnas duplicadas o que contenían información redundante. Estas columnas fueron combinadas en una sola variable consolidada, asegurando que no se perdiera información relevante y que los datos fueran más coherentes y fáciles de analizar.
+
+### Normalización de variables
+
+#### Primera eliminación de columnas
+
+Se eliminaron columnas que no aportaban valor al análisis con el fin de trabajar únicamente con la información relevante.
+
+```{r}
+DF_original <- read.csv("tendencias y factores.csv")
+DF <- DF_original # DF es una copia del dataframe original
+DF <- DF_original[, -c(1,2,4,18:147,164:175)] # se eliminan las columnas que no se utilizarán
+DF <- DF[,-c(15,17)]
+```
+
+#### Renombramiento de columnas
+
+Este proceso permitió obtener un conjunto de datos más limpio, comprensible y adecuado para el análisis posterior.
+
+A continuación se detalla el cambio realizado en cada una:
+
+| Nombre original                                                                                         | Nuevo nombre         |
+|----------------------------------------------------------------------------------------------------------|----------------------|
+| Área.de.la.carrera.que.estudias                                                                          | Carrera              |
+| X.Cuál.fue.el.costo.exacto.de.tu.laptop.actual.en.soles...Ejemplo..2499.90.                              | Costo                |
+| X.Cuál.es.tu.escala.socioeconómica.                                                                      | Escala               |
+| X.Hace.cuántos.años.compraste.tu.laptop.                                                                 | Antigüedad           |
+| Marca.de.tu.laptop.actual                                                                                | Marca                |
+| Tipo.de.laptop.actual                                                                                    | Tipo                 |
+| X.Cuál.es.la.capacidad.de.memoria.RAM.de.tu.laptop.actual.                                               | RAM                  |
+| X.Cuánto.tiempo.en.horas.y.minutos.crees.que.usas.tu.laptop.por.día..Puede.consultar.el.Screen.Time.de.su.dispositivo. | Tiempo de uso        |
+| X.Cuál.fue.el.factor.más.importante.para.elegir.tu.laptop.actual.                                        | Factor importante    |
+| X.Qué.tan.influenciado.estuviste.por.la.publicidad.en.redes.sociales.para.elegir.tu.laptop.actual.      | Publicidad           |
+| X.Qué.sistema.operativo.usas.                                                                            | Sistema operativo    |
+| Edad.9                                                                                                   | Edad 2               |
+| Sexo.9                                                                                                   | Sexo 2               |
+| Área.de.la.carrera.que.estudias.9                                                                        | Carrera 2            |
+| X.Cuál.es.tu.escala.socioeconómica..9                                                                    | Escala 2             |
+| X.Cuál.fue.el.costo.exacto.de.tu.laptop.actual.en.soles...Ejemplo..2499.90..9                            | Costo 2              |
+| X.Hace.cuántos.años.compraste.tu.laptop..9                                                               | Antigüedad 2         |
+| Marca.de.tu.laptop.actual.9                                                                              | Marca 2              |
+| Tipo.de.laptop.actual.9                                                                                  | Tipo 2               |
+| X.Cuál.es.la.capacidad.de.memoria.RAM.de.tu.laptop.actual..9                                             | RAM 2                |
+| X.Cuánto.tiempo.en.horas.y.minutos.crees.que.usas.tu.laptop.por.día..Puede.consultar.el.Screen.Time.de.su.dispositivo..9 | Tiempo de uso 2      |
+| X.Cuáles.fueron.los.factores.más.importante.para.elegir.tu.laptop.actual.                                | Factor importante 2  |
+| X.Qué.tan.influenciado.estuviste.por.la.publicidad.en.redes.sociales.para.elegir.tu.laptop.actual..9    | Publicidad 2         |
+| X.Qué.sistema.operativo.usas.más.                                                                        | Sistema operativo 2  |
+| X.Qué.tan.satisfecho.estás.con.tu.laptop.actual.                                                         | Satisfacción         |
+| X.Qué.tan.satisfecho.estás.con.tu.laptop.actual..9                                                       | Satisfacción 2       |
+
+
+```{r}
+DF <- rename(DF,
+            "Carrera" = "Área.de.la.carrera.que.estudias",
+            "Costo"="X.Cuál.fue.el.costo.exacto.de.tu.laptop.actual.en.soles...Ejemplo..2499.90.",
+            "Escala" = "X.Cuál.es.tu.escala.socioeconómica.",
+            "Antigüedad" = "X.Hace.cuántos.años.compraste.tu.laptop."  ,
+            "Marca" = "Marca.de.tu.laptop.actual" ,
+            "Tipo" = "Tipo.de.laptop.actual" ,
+            "RAM" = "X.Cuál.es.la.capacidad.de.memoria.RAM.de.tu.laptop.actual.",
+            "Tiempo de uso" ="X.Cuánto.tiempo.en.horas.y.minutos.crees.que.usas.tu.laptop.por.día..Puede.consultar.el.Screen.Time.de.su.dispositivo." ,
+            "Factor importante" = "X.Cuál.fue.el.factor.más.importante.para.elegir.tu.laptop.actual." ,
+            "Publicidad" = "X.Qué.tan.influenciado.estuviste.por.la.publicidad.en.redes.sociales.para.elegir.tu.laptop.actual."  ,
+            "Sistema operativo" = "X.Qué.sistema.operativo.usas." ,
+            "Edad 2" = "Edad.9",
+            "Sexo 2" = "Sexo.9",
+            "Carrera 2" = "Área.de.la.carrera.que.estudias.9", 
+            "Escala 2" = "X.Cuál.es.tu.escala.socioeconómica..9",
+            "Costo 2" = "X.Cuál.fue.el.costo.exacto.de.tu.laptop.actual.en.soles...Ejemplo..2499.90..9",
+            "Antigüedad 2" = "X.Hace.cuántos.años.compraste.tu.laptop..9",
+            "Marca 2" = "Marca.de.tu.laptop.actual.9",
+            "Tipo 2" = "Tipo.de.laptop.actual.9",
+            "RAM 2" = "X.Cuál.es.la.capacidad.de.memoria.RAM.de.tu.laptop.actual..9",
+            "Tiempo de uso 2" = "X.Cuánto.tiempo.en.horas.y.minutos.crees.que.usas.tu.laptop.por.día..Puede.consultar.el.Screen.Time.de.su.dispositivo..9",
+            "Factor importante 2" = "X.Cuáles.fueron.los.factores.más.importante.para.elegir.tu.laptop.actual.",
+            "Publicidad 2" = "X.Qué.tan.influenciado.estuviste.por.la.publicidad.en.redes.sociales.para.elegir.tu.laptop.actual..9",
+            "Sistema operativo 2" = "X.Qué.sistema.operativo.usas.más.",
+            "Satisfacción" =  "X.Qué.tan.satisfecho.estás.con.tu.laptop.actual."    ,
+            "Satisfacción 2" = "X.Qué.tan.satisfecho.estás.con.tu.laptop.actual..9"  
+  
+  )
+
+  # mostrar los nuevos encabezados
+  str(DF)
+```
+
+#### Manejo de duplicados y segunda eliminación de columnas
+
+Dentro de las columnas del *dataframe* se encontraron columnas duplicadas. Estas columnas fueron combinadas para evitar confusiones y para asegurar que los datos se mantuvieran únicos y precisos.
+
+```{r}
+# Lista de nombres base para las columnas que deben fusionarse
+cabeceras_repetidas <- c(
+  "Sexo",
+  "Edad",
+  "Carrera",
+  "Escala",
+  "Costo",
+  "Antigüedad",
+  "Marca",
+  "Tipo",
+  "RAM",
+  "Tiempo de uso",
+  "Factor importante",
+  "Publicidad",
+  "Sistema operativo",
+  "Satisfacción"
+)
+
+DF <- DF %>% mutate(across(everything(), as.character))
+for (nombre in cabeceras_repetidas) {  
+  columnas_similares <- DF %>% select(starts_with(nombre))
+  DF[[nombre]] <- apply(columnas_similares, 1, function(x) {
+    primero_valido <- x[!is.na(x) & x != ""][1]
+    if (is.null(primero_valido)) NA else primero_valido
+  })
+}
+
+# Eliminando columnas ineecesarias
+DF <- DF[,-c(15:40)]
+```
+
+Posteriormente, se guardó el *dataframe* modificado en un archivo *.csv* para su  análisis.
+
+```{r}
+# Guardar el archivo final
+write_csv(DF, "Sin columnas innecesarias y renombradas.csv")
+
+# Mostrar encabezados
+str(DF)
+```
+
+### Estandarización de respuestas
+
+#### 
+
+## Aplicación de criterios
+
+## Manejo de outliers y variabilidad
+
+
+## Gestión de valores nulos
+
+
+## Gestión de variables
+
+### Descomposición de variables
