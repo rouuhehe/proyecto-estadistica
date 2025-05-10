@@ -25,6 +25,7 @@ editor: visual
 Conocer las tendencias y procesos detrás de la decisión de compra de laptops de estudiantes universitarios es importante tanto para el sector comercial, por las oportunidades de mercado, como para los estudiantes. Pues su objetivo es elegir una laptop que responda a las exigencias y competencias académicas. Este estudio se centra en recolectar y analizar la relación entre factores clave que influyen en la compra de laptops por parte de estudiantes universitarios de Lima Metropolitana. De esta manera, se logrará no solo identificar patrones de consumo, sino también servirá de guía para futuros compradores.
 
 ## Objetivos:
+
 ### Objetivo General:
 
 Identificar las principales tendencias y factores que, en 2025, influyen en la elección de laptops por parte de los estudiantes, tomando en cuenta sus necesidades y preferencias tecnológicas.
@@ -108,7 +109,7 @@ Estudiantes universitarios de Lima Metropolitana que poseen una laptop.
 
 ## Recolección de datos:
 
-Se realizó una encuesta por Google Forms a estudiantes de diversas carreras en distintas universidades de Lima Metropolitana. 
+Se realizó una encuesta por Google Forms a estudiantes de diversas carreras en distintas universidades de Lima Metropolitana.
 
 ## Variables:
 
@@ -129,9 +130,9 @@ Se realizó una encuesta por Google Forms a estudiantes de diversas carreras en 
 | Satisfacción | Cualitativa ordinal | Grado de satisfacción del estudiante respecto a la laptop. | Cinco grados desde muy satisfecho a muy insatisfecho. |
 | Escala | Cualitativa ordinal | Información socioeconómica del estudiante. | Desde la A hasta la E de acuerdo a lo establecido por el INEI. |
 
-# Limpieza de datos 
+# Limpieza de datos
 
-## Normalización 
+## Normalización
 
 Durante esta etapa se realizaron ajustes para unificar el formato y la estructura de los datos. Un caso importante fue la detección de columnas duplicadas o que contenían información redundante. Estas columnas fueron combinadas en una sola variable consolidada, asegurando que no se perdiera información relevante y que los datos fueran más coherentes y fáciles de analizar.
 
@@ -151,37 +152,6 @@ DF <- DF[,-c(15,17)]
 #### Renombramiento de columnas
 
 Este proceso permitió obtener un conjunto de datos más limpio, comprensible y adecuado para el análisis posterior.
-
-A continuación se detalla el cambio realizado en cada una:
-
-| Nombre original                                                                                         | Nuevo nombre         |
-|----------------------------------------------------------------------------------------------------------|----------------------|
-| Área.de.la.carrera.que.estudias                                                                          | Carrera              |
-| X.Cuál.fue.el.costo.exacto.de.tu.laptop.actual.en.soles...Ejemplo..2499.90.                              | Costo                |
-| X.Cuál.es.tu.escala.socioeconómica.                                                                      | Escala               |
-| X.Hace.cuántos.años.compraste.tu.laptop.                                                                 | Antigüedad           |
-| Marca.de.tu.laptop.actual                                                                                | Marca                |
-| Tipo.de.laptop.actual                                                                                    | Tipo                 |
-| X.Cuál.es.la.capacidad.de.memoria.RAM.de.tu.laptop.actual.                                               | RAM                  |
-| X.Cuánto.tiempo.en.horas.y.minutos.crees.que.usas.tu.laptop.por.día..Puede.consultar.el.Screen.Time.de.su.dispositivo. | Tiempo de uso        |
-| X.Cuál.fue.el.factor.más.importante.para.elegir.tu.laptop.actual.                                        | Factor importante    |
-| X.Qué.tan.influenciado.estuviste.por.la.publicidad.en.redes.sociales.para.elegir.tu.laptop.actual.      | Publicidad           |
-| X.Qué.sistema.operativo.usas.                                                                            | Sistema operativo    |
-| Edad.9                                                                                                   | Edad 2               |
-| Sexo.9                                                                                                   | Sexo 2               |
-| Área.de.la.carrera.que.estudias.9                                                                        | Carrera 2            |
-| X.Cuál.es.tu.escala.socioeconómica..9                                                                    | Escala 2             |
-| X.Cuál.fue.el.costo.exacto.de.tu.laptop.actual.en.soles...Ejemplo..2499.90..9                            | Costo 2              |
-| X.Hace.cuántos.años.compraste.tu.laptop..9                                                               | Antigüedad 2         |
-| Marca.de.tu.laptop.actual.9                                                                              | Marca 2              |
-| Tipo.de.laptop.actual.9                                                                                  | Tipo 2               |
-| X.Cuál.es.la.capacidad.de.memoria.RAM.de.tu.laptop.actual..9                                             | RAM 2                |
-| X.Cuánto.tiempo.en.horas.y.minutos.crees.que.usas.tu.laptop.por.día..Puede.consultar.el.Screen.Time.de.su.dispositivo..9 | Tiempo de uso 2      |
-| X.Cuáles.fueron.los.factores.más.importante.para.elegir.tu.laptop.actual.                                | Factor importante 2  |
-| X.Qué.tan.influenciado.estuviste.por.la.publicidad.en.redes.sociales.para.elegir.tu.laptop.actual..9    | Publicidad 2         |
-| X.Qué.sistema.operativo.usas.más.                                                                        | Sistema operativo 2  |
-| X.Qué.tan.satisfecho.estás.con.tu.laptop.actual.                                                         | Satisfacción         |
-| X.Qué.tan.satisfecho.estás.con.tu.laptop.actual..9                                                       | Satisfacción 2       |
 
 
 ```{r}
@@ -255,27 +225,246 @@ for (nombre in cabeceras_repetidas) {
 DF <- DF[,-c(15:40)]
 ```
 
-Posteriormente, se guardó el *dataframe* modificado en un archivo *.csv* para su  análisis.
+Posteriormente, se guardó el *dataframe* modificado en un archivo *.csv* para su análisis.
 
 ```{r}
 # Guardar el archivo final
 write_csv(DF, "Sin columnas innecesarias y renombradas.csv")
-
-# Mostrar encabezados
-str(DF)
 ```
 
 ### Estandarización de respuestas
 
-#### 
+Se empezó generando una tabla en donde se guardó la tabla normalizada y sobre esta misma se trabajó la estandarización de cada variable.
+
+```{r}
+DF_Normalizado <- DF
+```
+
+#### Carrera
+
+Esta variable se estandarizó siguiendo la clasificación de campos académicos `UNESCO ISCED-F 2013`.
+
+Referencia: `UNESCO Institute for Statistics (2015). ISCED Fields of Education and Training 2013 (ISCED-F 2013).`
+
+-   Valores Iniciales:
+
+| Código | Área                                               |
+|--------|----------------------------------------------------|
+| 01     | Educación                                          |
+| 02     | Artes y Humanidades                                |
+| 03     | Ciencias Sociales, Periodismo e Información        |
+| 04     | Administración y Derecho                           |
+| 05     | Ciencias Naturales, Matemáticas y Estadística      |
+| 06     | Tecnologías de la Información y Comunicación (TIC) |
+| 07     | Ingeniería, Industria y Construcción               |
+| 08     | Agricultura, Silvicultura, Pesca y Veterinaria     |
+| 09     | Salud y Bienestar                                  |
+| 10     | Servicios (como Turismo, Hotelería)                |
+
+-   Valores Estandarizados:
+
+| Dato original | Categoría ISCED recomendada |
+|------------------------------------|------------------------------------|
+| Ingeniería | 07 Ingeniería, Industria y Construcción |
+| Computación | 06 Tecnologías de la Información y Comunicación (TIC) |
+| Ciencias Económicas y Empresariales | 04 Administración y Derecho |
+| Agronomía y Ciencias Veterinarias | 08 Agricultura, Silvicultura, Pesca y Veterinaria |
+| Ciencias Sociales | 03 Ciencias Sociales, Periodismo e Información |
+| Derecho y Ciencias Jurídicas | 04 Administración y Derecho |
+| Ciencias Naturales o Biológicas | 05 Ciencias Naturales, Matemáticas y Estadística |
+| Humanidades o Letras | 02 Artes y Humanidades |
+| Educación | 01 Educación |
+| Ciencias de la Salud | 09 Salud y Bienestar |
+| Artes | 02 Artes y Humanidades |
+| Turismo, Hotelería y Gastronomía | 10 Servicios |
+| Ciencias Exactas o Físicas | 05 Ciencias Naturales, Matemáticas y Estadística |
+| Matemáticas Puras o Aplicadas | 05 Ciencias Naturales, Matemáticas y Estadística |
+| Defensa, Seguridad y Ciencias Militares | 07 Ingeniería, Industria y Construcción (*puede variar*) |
+| Arquitectura | 07 Ingeniería, Industria y Construcción |
+| Transporte y Logística | 10 Servicios |
+
+```{r}
+# Mapeo de carreras
+# Cargar tidyverse para manejo de datos
+library(tidyverse)
+
+# Crear tabla de mapeo
+mapeo_carreras <- tibble(
+  carrera_original = c(
+    "Ingeniería",
+    "Computación",
+    "Ciencias Económicas y Empresariales",
+    "Agronomía y Ciencias Veterinarias",
+    "Ciencias Sociales",
+    "Derecho y Ciencias Jurídicas",
+    "Ciencias Naturales o Biológicas",
+    "Humanidades o Letras",
+    "Educación",
+    "Ciencias de la Salud",
+    "Artes",
+    "Turismo, Hotelería y Gastronomía",
+    "Ciencias Exactas o Físicas",
+    "Matemáticas Puras o Aplicadas",
+    "Defensa, Seguridad y Ciencias Militares",
+    "Arquitectura",
+    "Transporte y Logística"
+  ),
+  categoria_ISCED = c(
+    "Ingeniería, Industria y Construcción",
+    "Tecnologías de la Información y Comunicación (TIC)",
+    "Administración y Derecho",
+    "Agricultura, Silvicultura, Pesca y Veterinaria",
+    "Ciencias Sociales, Periodismo e Información",
+    "Administración y Derecho",
+    "Ciencias Naturales, Matemáticas y Estadística",
+    "Artes y Humanidades",
+    "Educación",
+    "Salud y Bienestar",
+    "Artes y Humanidades",
+    "Servicios",
+    "Ciencias Naturales, Matemáticas y Estadística",
+    "Ciencias Naturales, Matemáticas y Estadística",
+    "Ingeniería, Industria y Construcción",
+    "Ingeniería, Industria y Construcción",
+    "Servicios"
+  )
+)
+
+```
+
+```{r}
+DF_Normalizado <- DF %>%
+  left_join(mapeo_carreras, by = c("Carrera" = "carrera_original")) %>%
+  mutate(Carrera = categoria_ISCED) %>%
+  select(-categoria_ISCED)
+```
+
+```{r}
+DF_Normalizado[] <- lapply(DF_Normalizado, function(x) {
+  if (is.character(x)) tolower(x) else x
+})
+
+```
+
+#### Escala
+
+Esta es una variable **descrptiva ordinal**, por lo que se le aplicó el siguente criterio de orden:
+
+$$
+\text{E} < \text{D} < \text{C} < \text{B} < \text{A}
+$$
+
+```{r}
+DF_Normalizado$Escala <- factor(DF_Normalizado$Escala,
+                                      levels = c("e", "d", "c", "b", "a"),
+                                      ordered = TRUE)
+```
+
+#### Factor Importante
+
+#### Edad
+
+Tomando de base a los estudio del INEI sobre la educación, se estableció un rango de edades de 16 a 29 años y debido a los límites aplicados, la muestra se redujo a 1054 observaciones.
+
+```{r}
+DF_Normalizado$Edad <- as.character(DF_Normalizado$Edad)
+DF_Normalizado$Edad <- gsub("[^0-9]", "", DF_Normalizado$Edad)
+DF_Normalizado$Edad[DF_Normalizado$Edad == ""] <- NA
+DF_Normalizado$Edad <- as.numeric(DF_Normalizado$Edad)
+DF_Normalizado <- DF_Normalizado[DF_Normalizado$Edad >= 16 & DF_Normalizado$Edad <= 29, ]
+
+```
+
+#### Costo
+
+Se encontraron datos que usaban el punto decimal como seraparador de millar. Para corregirlo, se multiplicó estos valores por 1000.
+
+```{r}
+DF$Costo <- as.numeric(DF$Costo)
+DF$Costo[!is.na(DF$Costo) & DF$Costo > 0.5 & DF$Costo < 7.5] <- 
+  DF$Costo[!is.na(DF$Costo) & DF$Costo > 0.5 & DF$Costo < 7.5] * 1000
+DF$Costo[DF$Costo < 600 | DF$Costo > 20000] <- NA
+
+```
+
+#### Antigüedad
+
+Dentro de los datos se observaron algunos que especificaban que no contaban con una laptop, por lo que fueron eliminados, reduciendo la muestra a 1046 casos.
+
+```{r}
+DF_Normalizado$Antigüedad <- as.character(DF_Normalizado$Antigüedad)
+
+DF_Normalizado$Antigüedad[DF_Normalizado$Antigüedad == "0 (menos de 1 año)"] <- "0"
+DF_Normalizado$Antigüedad[DF_Normalizado$Antigüedad == "10 años"] <- "10"
+DF_Normalizado$Antigüedad[DF_Normalizado$Antigüedad == "6 años"] <- "6"
+DF_Normalizado$Antigüedad[DF_Normalizado$Antigüedad %in% c("7 años", "7 años ")] <- "7"
+DF_Normalizado$Antigüedad[DF_Normalizado$Antigüedad == "3, 8 años de uso (segunda mano)"] <- "3"
+valores_validos <- as.character(0:20)
+DF_Normalizado <- DF_Normalizado[DF_Normalizado$Antigüedad %in% valores_validos | is.na(DF_Normalizado$Antigüedad), ]
+
+DF_Normalizado$Antigüedad <- as.numeric(DF_Normalizado$Antigüedad)
+```
+
+#### Marca
+
+En la variable, se encontraron casos em donde especificaban que no contaban con una laptop, por lo que fueron eliminados, reduciendo la muestra a 1045 casos.
+
+```{r}
+marcas <- c(
+  "hp", "asus", "lenovo", "acer", "dell", "toshiba", "msi", "apple", "huaweii", "microsoft")
+
+DF_Normalizado <- DF_Normalizado[!(DF_Normalizado$Marca %in% c("no tengo", "no tengo ", "teros( es una computadora)", "es pc")), ]
+DF_Normalizado$Marca[!(DF_Normalizado$Marca %in% marcas)] <- "otro"
+```
+
+#### Tipo
+
+```{r}
+DF_Normalizado$Tipo[DF_Normalizado$Tipo == "empresarial (productividad y seguridad. ej: lenovo thinkpad, dell latitude)"] <- "empresarial"
+
+DF_Normalizado$Tipo[DF_Normalizado$Tipo == "gamer (potentes. ej: asus rog, acer predator, hp omen)"] <- "gamer"
+
+DF_Normalizado$Tipo[DF_Normalizado$Tipo == "tradicional (básicas estándar. ej: hp pavilion, lenovo ideapad)"] <- "tradicional"
+
+DF_Normalizado$Tipo[DF_Normalizado$Tipo == "ultrabook (ligeras y delgadas. ej: macbook air, dell xps 13, asus zenbook)"] <- "ultrabook"
+
+DF_Normalizado$Tipo[DF_Normalizado$Tipo == "convertible/desmontable (se pueden usar también como tablet o laptop. ej: hp spectre x360, lenovo yoga, microsoft surface pro)"] <- "convertible"
+
+DF_Normalizado$Tipo[DF_Normalizado$Tipo == "orientada a diseño (rendimiento gráfico. ej: macbook pro, microsoft surface laptop studio)"] <- "orientada a diseño"
+
+
+```
+
+#### RAM
+
+```{r}
+library(stringr)
+
+DF_Normalizado <- DF_Normalizado %>%
+  mutate(RAM = tolower(as.character(RAM)),
+         RAM_num = as.numeric(str_extract(RAM, "\\d+")),  # extrae primer número
+         RAM = case_when(
+           str_detect(RAM, "t") ~ RAM_num * 1000,
+           str_detect(RAM, "no se|no sé|no estoy seguro|no lo se|nose") ~ NA_real_,
+           TRUE ~ RAM_num
+         )
+  ) %>%
+  select(-RAM_num)
+```
+
+#### Tiempo de uso
+
+#### Publicidad
+
+#### Sistema operativo
+
+#### Satisfacción
 
 ## Aplicación de criterios
 
 ## Manejo de outliers y variabilidad
 
-
 ## Gestión de valores nulos
-
 
 ## Gestión de variables
 

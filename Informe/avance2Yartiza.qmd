@@ -44,8 +44,8 @@ Con el paso de los años, la tecnología de las laptops fue mostrando grandes av
 
 Nos ayudamos con un diagrama de Gantt para la repartición de tareas y establecimiento de fechas. Esto con el fin de avanzar las actividades relacionadas al estudio de una manera ordenada y eficiente.
 
-```{r, message=FALSE, warning=FALSE, echo=TRUE}
-#install.packages("ggplot2")
+```{r, , message=FALSE, warning=FALSE, echo=TRUE}
+#install.packages("ggplot2)
 #install.packages("tidyr")
 #install.packages("lubridate")
 library(ggplot2)
@@ -53,10 +53,9 @@ library(tidyr)
 library(lubridate)
 library(dplyr)
 library(readr)
-library(readxl)
 
 today <- Sys.Date()
-diagrama <- read_csv("Diagrama de gantt - Hoja 1 (3).csv") 
+diagrama <- read.csv("Diagrama de gantt 2 .csv") 
 diagrama$Start <- paste(diagrama$Start,"/2025") 
 diagrama$End <- paste(diagrama$End,"/2025") 
 diagrama$Start <- dmy(diagrama$Start) 
@@ -118,7 +117,7 @@ Se realizó una encuesta por Google Forms a estudiantes de diversas carreras de 
 ## Variables:
 
 | *Variable* | *Tipo* | *Descripción* | *Restricciones* |
-|----|----|----|----|
+|------------------|------------------|------------------|------------------|
 | Edad | Cuantitativa discreta | Edad en años del estudiante encuestado. | Es un número entero mayor igual a 16 y menor igual a 29 |
 | Antigüedad | Cuantitativa discreta | Número de años que pasaron desde la laptop. | Es un número entero no negativo. |
 | RAM | Cuantitativa discreta | Capacidad de la RAM medida en GB. | Es un número entero no negativos. |
@@ -148,10 +147,11 @@ library(readr)
 Ahora cargaremos el archivo. Donde se mostrará que cumplimos con la meta de 200 encuestados.
 
 ```{r}
-DFO <- read_csv("tendencias y factores.csv")
+DFO <- read.csv("Tendencias y factores clave (csv directo).csv")
 DF = DFO
+DFPgrupo <- filter(DFO,DFO$X.Cuál.es.el.grupo.que.te.está.encuestando. == "Grupo 9")
+nrow(DFPgrupo)
 
-glimpse(DF)
 ```
 
 De modo que al obtener 201 encuestados. Cumplimos con lo requerido.\
@@ -230,7 +230,7 @@ DF$Antigüedad [DF$Antigüedad != round(DF$Antigüedad,0)] <- NA
 table(DF$Antigüedad)
 ```
 
-## Edad
+### Edad
 
 Establecemos un rango de edades la cual solo evalúa edades entre 16 y 29. Este parámetro se establece en base a los estudios del INEI sobre la educación.
 
@@ -258,7 +258,7 @@ DF$Edad[DF$Edad < 16 | DF$Edad > 29] <- NA
 table(DFP2$Edad, useNA = "always")
 ```
 
-## Costo
+### Costo
 
 Se encontraron datos que usaban el punto decimal como seraparador de millar por algunos estudiantes. Para corregirlo se aplico que los estudiantes que tuvieran montos menores a 7.5 pero mayores iguales a 0.5 se multiplicaran x1000.
 
@@ -394,8 +394,10 @@ DF$"Tiempo de uso" = as.numeric(DF$"Tiempo de uso") / 3600
 
 DF$"Tiempo de uso" = round(DF$"Tiempo de uso", 4)
 
-head(DF)
-summary(DF$`Tiempo de uso`)
+#quitamos outliers y valores atípicos
+outlier <- DF[DF$`Tiempo de uso`<18,]
+
+summary(outlier$`Tiempo de uso`)
 
 ```
 
@@ -473,7 +475,7 @@ Para clasificarlos usaremos la clasificación de campos académicos (`UNESCO ISC
 Para nuestro caso en particular se propone:
 
 | Dato original | Categoría ISCED recomendada |
-|----|----|
+|------------------------------------|------------------------------------|
 | Ingeniería | 07 Ingeniería, Industria y Construcción |
 | Computación | 06 Tecnologías de la Información y Comunicación (TIC) |
 | Ciencias Económicas y Empresariales | 04 Administración y Derecho |
@@ -595,7 +597,7 @@ DF_Normalizado$`Factor importante` <- DF_Normalizado$`Factor importante` %>%
   lapply(stri_trans_general, "Latin-ASCII")  # Elimina acentos
 
 
-table(is.na(DF_Normalizado))
+#table(is.na(DF_Normalizado))
 # Ver la tabla de frecuencia (esto se aplicará por cada lista de criterios)
 table(unlist(DF_Normalizado$`Factor importante`))
 
@@ -626,11 +628,11 @@ valores_validos <- c(
   "recomendacion",
   "rendimiento",
   "portabilidad",
- "estética"
+ "estetica"
 )
 ```
 
-Una vez seleccionados los valores válidos, lo que haremos es convertir los elementos de cada fila (que están ordenados como una lista, ej: marca,precio,portabilidad) en TRUE o FALSE si es que están o no en el vector valores_validos. En el caso que el elemento no esté en valores_validos, se convierte en TRUE y es su valor es reemplazado por "otro".
+Una vez seleccionados los valores válidos, lo que haremos es convertir los elementos de cada fila (que están ordenados como una lista) en TRUE o FALSE si es que están o no en el vector valores_validos. En el caso que el elemento no esté en valores_validos, se convierte en TRUE y es su valor es reemplazado por "otro".
 
 ```{r}
 DF_FactorImportante$`Factor importante` <- sapply(DF_FactorImportante$`Factor importante`, function(x) {
@@ -639,6 +641,8 @@ DF_FactorImportante$`Factor importante` <- sapply(DF_FactorImportante$`Factor im
   items[!tolower(items) %in% valores_validos] <- "otro"
   paste(unique(items), collapse = ";")
 })
+
+View(DF_FactorImportante)
 ```
 
 ```{r}
@@ -647,18 +651,21 @@ library(dplyr)
 
 DF_FactorImportante$`Factor importante` <- sapply(DF_FactorImportante$`Factor importante`, paste, collapse = ", ")
 
+DF_FactorImportante <- DF_FactorImportante %>%
+  mutate(
+    marca = grepl("marca", `Factor importante`),
+    recomendacion = grepl("recomendacion", `Factor importante`),
+    portabilidad = grepl("portabilidad", `Factor importante`),
+    rendimiento = grepl("rendimiento", `Factor importante`),
+    oferta = grepl("oferta", `Factor importante`),
+    precio = grepl("precio", `Factor importante`),
+    estetica = grepl("estetica", `Factor importante`),
+    otro = grepl("otro", `Factor importante`)
+  )
 
-# Vector con las palabras clave
-palabras_clave <- c("marca", "otro", "recomendacion", "portabilidad", "rendimiento", "oferta", "precio")
-
-# Contar la frecuencia de cada palabra clave
-conteos <- sapply(palabras_clave, function(palabra) str_count(todo_texto, palabra))
-
-# Crear tabla de resultados
-tabla_resultado <- data.frame(
-  Frecuencia = conteos
-)
-tabla_resultado
+conteo_factores <- colSums(DF_FactorImportante[, c("marca", "recomendacion", "portabilidad", 
+                                                    "rendimiento", "oferta", "precio", "estetica", "otro")])
+print(conteo_factores)
 ```
 
 Reemplazamos la columna "Factor Importante" limpia en DF_Normalizado.
@@ -727,34 +734,9 @@ table(DF_Variables$Carrera)
 De igual manera en comparación con la escala. La variable de carrera presenta una distribución heterogénea. De manera que, tampoco se eliminaría bajo este criterio.
 
 ```{r}
-
-
-library(stringr)
-library(dplyr)
-
-# table(DF_Variables$"Factor importante")
-#se elaborará un código para la frencuencia de cada factor
-palabras_clave <- c("marca", "otro", "recomendacion", "portabilidad", "rendimiento", "oferta", "precio")
-# Lista para guardar todas las palabras encontradas
-lista <- c()
-
-library(stringr)
-library(dplyr)
-
-# Vector con las palabras clave
-palabras_clave <- c("marca", "otro", "recomendacion", "portabilidad", "rendimiento", "oferta", "precio")
-
-# Convertir todo el texto en una sola cadena para facilitar el conteo
-todo_texto <- tolower(paste(DF_Variables$`Factor importante`, collapse = ", "))
-
-# Contar la frecuencia de cada palabra clave
-conteos <- sapply(palabras_clave, function(palabra) str_count(todo_texto, palabra))
-
-
-
-# Mostrar tabla ordenada por frecuencia
-tabla_resultado <- arrange(tabla_resultado, desc(Frecuencia))
-print(tabla_resultado)
+conteo_factores <- colSums(DF_FactorImportante[, c("marca", "recomendacion", "portabilidad", 
+                                                    "rendimiento", "oferta", "precio", "estetica", "otro")])
+print(conteo_factores)
 ```
 
 En este caso se observa una variedad de posibilidades. Esto debido a que los estudiantes podían marcar más de una alternativa. De igual manera, se observa una distribución heterogénea de los datos. Por este motivo. Esta variable tampoco se eliminaría por este criterio.
@@ -802,3 +784,37 @@ agregar una columna que cuente los NA por observación\
 establecer un porcentaje
 
 dividir el factor importante en columnas
+
+## Objetivo 1: Explorar la relación entre la carrera del estudiante y el factor de mayor importancia en la elección de laptops por parte de los estudiantes.
+
+Para analizar la relación, en primer lugar. Observaremos la distribución de datos relacionados al factor de mayor importancia mediante la elaboración de una tabla de frecuencias.
+
+```{r}
+#Se muestran los valores para cada factor
+conteo_factores <- colSums(DF_FactorImportante[, c("marca", "recomendacion", "portabilidad","rendimiento", "oferta", "precio", "estetica", "otro")])
+print(conteo_factores)
+
+#La cantidad total de personas analizadas
+nrow(DF_Efectivo)
+```
+
+De esta manera, al reunir los datos obtenemos:
+
+| Factor de mayor importancia | Frecuencia absoluta | Frecuencia relativa |
+|-----------------------------|---------------------|---------------------|
+| Marca                       | 429                 | 40.82%              |
+| Recomendación               | 366                 | 34.82%              |
+| Portabilidad                | 287                 | 27.31%              |
+| Rendimiento                 | 727                 | 69.17%              |
+| Oferta                      | 244                 | 23.22%              |
+| Precio                      | 537                 | 51.09%              |
+| Estética                    | 184                 | 17.51%              |
+| Otros                       | 19                  | 1.81%               |
+
+De esta manera, se observa que el factor de mayor relevancia en la elección de laptops es el rendimiento. Pues el 69.17% de los estudiantes lo consideraron como respuesta. De modo que, en segundo lugar va el precio con la mita de los estudiantes. En este sentido, los demás factores si bien tiene cierta importancia porque engloban entre el 15% y 30%.
+
+Para facilitar la visualización de los datos usamos un más gráfica.
+
+```{r}
+barplot(DF_FactorImportante,)
+```

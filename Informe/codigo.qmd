@@ -8,7 +8,7 @@ editor: visual
 library(dplyr)
 library(readr)
 
-DFO <- read.csv("Tendencias y factores.csv")
+DFO <- read.csv("tendencias y factores.csv")
 
 # DFO
 
@@ -150,7 +150,7 @@ Para clasificarlos usaremos la clasificación de campos académicos `UNESCO ISCE
 Para nuestro caso en particular se propone:
 
 | Dato original | Categoría ISCED recomendada |
-|----|----|
+|------------------------------------|------------------------------------|
 | Ingeniería | 07 Ingeniería, Industria y Construcción |
 | Computación | 06 Tecnologías de la Información y Comunicación (TIC) |
 | Ciencias Económicas y Empresariales | 04 Administración y Derecho |
