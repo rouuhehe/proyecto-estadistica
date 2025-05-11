@@ -352,6 +352,8 @@ DF_Normalizado$Escala <- factor(DF_Normalizado$Escala,
 
 #### Factor Importante
 
+Se normalizaron las respuestas eliminando acentos y separando los factores múltiples en listas. Se identificaron 8 factores válidos: "precio", "oferta", "marca", "recomendacion", "rendimiento", "portabilidad", "estetica" y "otros". Cada uno fue transformado en una variable booleana que indica si dicho factor fue considerado relevante por la persona encuestada.
+
 ```{r}
 library(stringi)
 library(dplyr)
@@ -412,7 +414,7 @@ DF_Normalizado$Antigüedad <- as.numeric(DF_Normalizado$Antigüedad)
 
 #### Marca
 
-En la variable, se encontraron casos em donde especificaban que no contaban con una laptop, por lo que fueron eliminados, reduciendo la muestra a 1045 casos.
+Se depuraron respuestas que indicaban no contar con laptop o dar una descripción ambigua. Se homogenizó la variable y los valores no reconocidos se agruparon como "otro", quedando 1045 casos válidos.
 
 ```{r}
 marcas <- c(
@@ -423,6 +425,8 @@ DF_Normalizado$Marca[!(DF_Normalizado$Marca %in% marcas)] <- "otro"
 ```
 
 #### Tipo
+
+Se simplificaron las categorías de tipo de laptop a opciones estandarizadas en minúsculas (ej. "gamer", "empresarial", etc.), facilitando el análisis categórico posterior.
 
 ```{r}
 DF_Normalizado$Tipo[DF_Normalizado$Tipo == "empresarial (productividad y seguridad. ej: lenovo thinkpad, dell latitude)"] <- "empresarial"
@@ -441,6 +445,8 @@ DF_Normalizado$Tipo[DF_Normalizado$Tipo == "orientada a diseño (rendimiento gr�
 ```
 
 #### RAM
+
+Se extrajeron los valores numéricos de la memoria RAM desde respuestas textuales. Se convirtieron los valores en terabytes a gigabytes (multiplicando por 1000), y se eliminaron respuestas no válidas o no comprendidas.
 
 ```{r}
 library(stringr)
@@ -463,7 +469,7 @@ DF_Normalizado$RAM[!DF_Normalizado$RAM %in% valores_validos] <- NA
 
 #### Tiempo de uso
 
-Encontramos tiempos de uso irrazonables, por lo que establecimos un máximo de 18 horas. Debido a esto, las filas fueron reducidas a 1029.
+Se transformó el tiempo de uso de formato HH:MM:SS a horas decimales. Para evitar sesgos, se eliminaron valores atípicos mayores a 18 horas diarias, dejando 1029 respuestas consistentes.
 
 ```{r}
 DF_Normalizado <- DF_Normalizado %>%
@@ -476,6 +482,8 @@ DF_Normalizado <- DF_Normalizado %>%
 ```
 
 #### Satisfacción
+
+La satisfacción fue convertida a una variable ordinal con cinco niveles, desde "muy insatisfecho" hasta "súper satisfecho", lo que permite un análisis de tendencia y promedios ponderados.
 
 ```{r}
 DF_Normalizado$Satisfacción <- factor(DF_Normalizado$Satisfacción,
@@ -490,13 +498,16 @@ DF_Normalizado$Satisfacción <- factor(DF_Normalizado$Satisfacción,
 
 #### Sistema operativo
 
+Se mantuvieron solo los sistemas operativos "windows", "macos" y "linux", agrupando el resto como "otros" para evitar ruido en el análisis.
+
 ```{r}
 os <- c("windows", "macos", "linux")
 DF_Normalizado$'Sistema operativo'[!(DF_Normalizado$'Sistema operativo' %in% os)] <- 'otros'
-unique(DF_Normalizado$'Sistema operativo')
 ```
 
 #### Publicidad
+
+Se ordenaron las respuestas de influencia publicitaria en cinco niveles, de "nada influenciado" a "muy influenciado", lo que facilita su análisis como variable ordinal.
 
 ```{r}
 DF_Normalizado$Publicidad <- factor(DF_Normalizado$Publicidad,
@@ -508,10 +519,41 @@ DF_Normalizado$Publicidad <- factor(DF_Normalizado$Publicidad,
                      ordered = TRUE)
 ```
 
+### Revisión post-limpieza
 
-## DataFrame limpio
+Luego de aplicar los criterios de limpieza y transformación de los datos, se realizó una revisión final para garantizar la calidad del dataset:
 
-Dentro del nuevo dataframe 'DF_Objetivos' se separará la variable 'Factor importante' en 8 variables booleanas.
+-   Valores perdidos (NA): Se contabilizaron los valores faltantes en cada variable para evaluar su impacto en el análisis posterior.
+
+```{r}
+colSums(is.na(DF_Normalizado))
+```
+
+-   Duplicados: Se eliminaron posibles filas duplicadas para asegurar la unicidad de cada caso.
+
+```{r}
+DF_Normalizado <- DF_Normalizado %>% distinct()
+```
+
+-   Tipos de datos: Las variables categóricas como Marca, Tipo, y Sistema operativo fueron convertidas al tipo factor, y las variables booleanas quedaron como tipo logical, asegurando su correcta interpretación en análisis estadísticos y modelos.
+
+```{r}
+DF_Normalizado$Marca <- factor(DF_Normalizado$Marca)
+DF_Normalizado$Tipo <- factor(DF_Normalizado$Tipo)
+```
+
+-   Outliers restantes: Se realizó una revisión visual de posibles valores atípicos en variables numéricas como RAM y Tiempo de uso, mediante diagramas de caja (boxplots), para confirmar que no persisten valores anómalos que distorsionen los resultados.
+
+```{r}
+boxplot(DF_Normalizado$RAM, main = "RAM")
+boxplot(DF_Normalizado$`Tiempo de uso`, main = "Tiempo de uso")
+```
+
+-   Coherencia interna: Finalmente, se revisó que no existan inconsistencias lógicas entre variables. Por ejemplo, casos donde se indique poseer una laptop pero no se haya registrado información relevante como RAM, marca o tipo, fueron eliminados previamente.
+
+## Presentación de la tabla final
+
+Dentro del nuevo dataframe 'DF_Objetivos' se separará la variable 'Factor importante' en 8 variables y se acoplarán las variables 'Carrera', 'Escala' y 'Tiempo de uso'
 
 ```{r}
 library(dplyr)
@@ -521,7 +563,8 @@ DF_Objetivos <- DF_Normalizado %>%
   select(
     'Factor importante',
     'Carrera',
-    'Escala'
+    'Escala',
+    'Tiempo de uso'
   )
 
 valores_validos <- c("precio", "oferta", "marca", "recomendacion", "rendimiento", "portabilidad", "estetica", "otros")
@@ -537,4 +580,94 @@ DF_Objetivos <- DF_Objetivos %>%
   select(-`Factor importante`)
 ```
 
+### Manejo de nulos
 
+Debido a que las 4 cuatro variables eran obligatorias en la encuesta, no se encontraron valores nulos en la tabla final, por lo que no se realizaron acciones adicionales para tratarlos.
+
+```{r}
+#evaluando los nulos de las variables
+apply(is.na(DF_Objetivos) , 2, sum)
+```
+
+## Objetivo 1: Explorar la relación entre la carrera del estudiante y el factor de mayor importancia en la elección de laptops por parte de los estudiantes.
+
+Para analizar esta relación, se elaboraron dos tablas de frecuencias: una que incluye a todas las carreras excepto *Ingeniería, industria y construcción*, y otra exclusivamente para los estudiantes de dicha área. Esta separación se justifica debido a que la muestra correspondiente a *Ingeniería, industria y construcción* representa más del 50% del total de encuestados, lo que podría sesgar los resultados generales. Al analizar ambas por separado, se busca identificar patrones específicos en la elección de laptops según el tipo de carrera y evitar una interpretación desbalanceada de los datos.
+
+### Tabla de frecuencias de todas las carreras (sin ingeniería)
+
+```{r}
+# Filtrar los estudiantes de ingeniería
+DF_Ingenieria <- DF_Objetivos %>%
+  filter(Carrera == "ingeniería, industria y construcción")
+
+# Filtrar el resto de carreras
+DF_Otros <- DF_Objetivos %>%
+  filter(Carrera != "ingeniería, industria y construcción")
+```
+
+
+```{r}
+# Agrupar por carrera y contar la frecuencia de cada factor
+tabla_frecuencia <- DF_Otros %>%
+  group_by(Carrera) %>%
+  summarise(
+    Marca = sum(Marca, na.rm = TRUE),
+    Recomendacion = sum(Recomendacion, na.rm = TRUE),
+    Portabilidad = sum(Portabilidad, na.rm = TRUE),
+    Rendimiento = sum(Rendimiento, na.rm = TRUE),
+    Oferta = sum(Oferta, na.rm = TRUE),
+    Precio = sum(Precio, na.rm = TRUE),
+    Estetica = sum(Estetica, na.rm = TRUE),
+    Otro = sum(Otros, na.rm = TRUE)
+  )
+
+# Calcular las frecuencias relativas por carrera
+tabla_frecuencia_relativa <- tabla_frecuencia %>%
+  mutate(
+    Marca_rel = round(Marca / sum(Marca) * 100,2),
+    Recomendacion_rel = round(Recomendacion / sum(Recomendacion) * 100,2),
+    Portabilidad_rel = round(Portabilidad / sum(Portabilidad) * 100,2),
+    Rendimiento_rel = round(Rendimiento / sum(Rendimiento) * 100,2),
+    Oferta_rel = round(Oferta / sum(Oferta) * 100,2),
+    Precio_rel = round(Precio / sum(Precio) * 100,2),
+    Estetica_rel = round(Estetica / sum(Estetica) * 100,2),
+    Otro_rel = round(Otro / sum(Otro) * 100,2)
+  )
+
+# Visualizar las tablas
+print(tabla_frecuencia_relativa)  # Frecuencias relativas
+```
+
+
+### Tabla de frecuencias de ingeniería
+
+```{r}
+
+cantidad_ing <- nrow(DF_ingenieria)
+print(cantidad_ing)
+
+# Agrupar por carrera y contar la frecuencia de cada factor
+frecuencia_inge <- DF_Ingenieria %>%
+  summarize(across(c(Marca, Recomendacion, Portabilidad, Rendimiento, Oferta, Precio, Estetica, Otros), sum))
+
+# Calcular las frecuencias relativas por carrera
+tabla_frecuencia_relativa_ing <- frecuencia_inge %>%
+  mutate(
+    Marca_rel = round(Marca / cantidad_ing * 100, 2),
+    Recomendacion_rel = round(Recomendacion / cantidad_ing * 100, 2),
+    Portabilidad_rel = round(Portabilidad / cantidad_ing * 100, 2),
+    Rendimiento_rel = round(Rendimiento / cantidad_ing * 100, 2),
+    Oferta_rel = round(Oferta / cantidad_ing * 100, 2),
+    Precio_rel = round(Precio / cantidad_ing * 100, 2),
+    Estetica_rel = round(Estetica / cantidad_ing * 100, 2),
+    Otros_rel = round(Otros / cantidad_ing * 100, 2)
+  )
+
+# Visualizar las tablas
+print(tabla_frecuencia_relativa_ing)  # Frecuencias relativas
+```
+
+
+## Objetivo 2:
+
+## Objetivo 3:
