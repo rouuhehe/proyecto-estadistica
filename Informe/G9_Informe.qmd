@@ -384,11 +384,11 @@ DF_Normalizado$`Factor importante` <- sapply(DF_Normalizado$`Factor importante`,
 Se encontraron datos que usaban el punto decimal como seraparador de millar. Para corregirlo, se multiplicó estos valores por 1000.
 
 ```{r}
-DF$Costo <- as.numeric(DF$Costo)
-DF$Costo[!is.na(DF$Costo) & DF$Costo < 7.5] <- 
-  DF$Costo[!is.na(DF$Costo) & DF$Costo < 7.5] * 1000
+DF_Normalizado$Costo <- as.numeric(DF_Normalizado$Costo)
+DF_Normalizado$Costo[!is.na(DF_Normalizado$Costo) & DF_Normalizado$Costo < 7.5] <- 
+  DF_Normalizado$Costo[!is.na(DF_Normalizado$Costo) & DF_Normalizado$Costo < 7.5] * 1000
 
-DF$Costo[DF$Costo < 600 | DF$Costo > 20000] <- NA
+DF_Normalizado$Costo[DF_Normalizado$Costo < 600 | DF_Normalizado$Costo > 20000] <- NA
 
 ```
 
@@ -506,6 +506,35 @@ DF_Normalizado$Publicidad <- factor(DF_Normalizado$Publicidad,
                                 "algo influenciado",
                                 "muy influenciado"),
                      ordered = TRUE)
+```
+
+
+## DataFrame limpio
+
+Dentro del nuevo dataframe 'DF_Objetivos' se separará la variable 'Factor importante' en 8 variables booleanas.
+
+```{r}
+library(dplyr)
+library(stringr)
+
+DF_Objetivos <- DF_Normalizado %>%
+  select(
+    'Factor importante',
+    'Carrera',
+    'Escala'
+  )
+
+valores_validos <- c("precio", "oferta", "marca", "recomendacion", "rendimiento", "portabilidad", "estetica", "otros")
+
+for (factor in valores_validos) {
+  DF_Objetivos[[str_to_title(factor)]] <- as.integer(str_detect(
+    tolower(DF_Objetivos$`Factor importante`),
+    paste0("\\b", factor, "\\b")
+  ))
+}
+
+DF_Objetivos <- DF_Objetivos %>%
+  select(-`Factor importante`)
 ```
 
 
