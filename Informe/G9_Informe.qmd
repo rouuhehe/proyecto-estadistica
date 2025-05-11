@@ -45,7 +45,7 @@ Con el pasar de los años, la tecnología ha evolucionado significativamente, in
 Se utilizó un *diagrama de Gantt* para la repartición y organización de los diferentes pasos del proyecto.
 
 ```{r, , message=FALSE, warning=FALSE, echo=TRUE}
-#install.packages("ggplot2)
+#install.packages("ggplot2")
 #install.packages("tidyr")
 #install.packages("lubridate")
 library(ggplot2)
@@ -143,6 +143,9 @@ Durante esta etapa se realizaron ajustes para unificar el formato y la estructur
 Se eliminaron columnas que no aportaban valor al análisis con el fin de trabajar únicamente con la información relevante.
 
 ```{r}
+library(readr)
+library(tidyr)
+library(dplyr)
 DF_original <- read.csv("tendencias y factores.csv")
 DF <- DF_original # DF es una copia del dataframe original
 DF <- DF_original[, -c(1,2,4,18:147,164:175)] # se eliminan las columnas que no se utilizarán
@@ -152,7 +155,6 @@ DF <- DF[,-c(15,17)]
 #### Renombramiento de columnas
 
 Este proceso permitió obtener un conjunto de datos más limpio, comprensible y adecuado para el análisis posterior.
-
 
 ```{r}
 DF <- rename(DF,
@@ -362,6 +364,7 @@ DF_Normalizado$Escala <- factor(DF_Normalizado$Escala,
 
 #### Factor Importante
 
+
 #### Edad
 
 Tomando de base a los estudio del INEI sobre la educación, se estableció un rango de edades de 16 a 29 años y debido a los límites aplicados, la muestra se redujo a 1054 observaciones.
@@ -381,15 +384,16 @@ Se encontraron datos que usaban el punto decimal como seraparador de millar. Par
 
 ```{r}
 DF$Costo <- as.numeric(DF$Costo)
-DF$Costo[!is.na(DF$Costo) & DF$Costo > 0.5 & DF$Costo < 7.5] <- 
-  DF$Costo[!is.na(DF$Costo) & DF$Costo > 0.5 & DF$Costo < 7.5] * 1000
+DF$Costo[!is.na(DF$Costo) & DF$Costo < 7.5] <- 
+  DF$Costo[!is.na(DF$Costo) & DF$Costo < 7.5] * 1000
+
 DF$Costo[DF$Costo < 600 | DF$Costo > 20000] <- NA
 
 ```
 
 #### Antigüedad
 
-Dentro de los datos se observaron algunos que especificaban que no contaban con una laptop, por lo que fueron eliminados, reduciendo la muestra a 1046 casos.
+Dentro de los datos se observaron algunos que especificaban que no contaban con una laptop, por lo que fueron eliminados, reduciendo la muestra a 1047 casos.
 
 ```{r}
 DF_Normalizado$Antigüedad <- as.character(DF_Normalizado$Antigüedad)
@@ -445,20 +449,63 @@ DF_Normalizado <- DF_Normalizado %>%
          RAM_num = as.numeric(str_extract(RAM, "\\d+")),  # extrae primer número
          RAM = case_when(
            str_detect(RAM, "t") ~ RAM_num * 1000,
-           str_detect(RAM, "no se|no sé|no estoy seguro|no lo se|nose") ~ NA_real_,
+           str_detect(RAM, "no se|no sé|no estoy seguro|no lo se|nose") ~ NA,
            TRUE ~ RAM_num
          )
   ) %>%
   select(-RAM_num)
+
+valores_validos <- c(4,8,12,16,24,32,40,48,64,96,128,192,256)
+
+DF_Normalizado$RAM[!DF_Normalizado$RAM %in% valores_validos] <- NA
 ```
 
 #### Tiempo de uso
 
-#### Publicidad
+Encontramos tiempos de uso irrazonables, por lo que establecimos un máximo de 18 horas. Debido a esto, las filas fueron reducidas a 1029.
+
+```{r}
+DF_Normalizado <- DF_Normalizado %>%
+  mutate(`Tiempo de uso` = hms(`Tiempo de uso`),
+         `Tiempo de uso` = as.numeric(`Tiempo de uso`) / 3600,
+         `Tiempo de uso` = round(`Tiempo de uso`, 2))
+
+DF_Normalizado <- DF_Normalizado %>%
+  filter(`Tiempo de uso` <= 18)
+```
+
+#### Satisfacción
+
+```{r}
+DF_Normalizado$Satisfacción <- factor(DF_Normalizado$Satisfacción,
+                     levels = c("muy insatisfecho",
+                                "poco satisfecho",
+                                "neutral",
+                                "algo satisfecho",
+                                "súper satisfecho"),
+
+                     ordered = TRUE)
+```
 
 #### Sistema operativo
 
-#### Satisfacción
+```{r}
+os <- c("windows", "macos", "linux")
+DF_Normalizado$'Sistema operativo'[!(DF_Normalizado$'Sistema operativo' %in% os)] <- 'otros'
+unique(DF_Normalizado$'Sistema operativo')
+```
+
+#### Publicidad
+
+```{r}
+DF_Normalizado$Publicidad <- factor(DF_Normalizado$Publicidad,
+                     levels = c("nada influenciado",
+                                "poco influenciado",
+                                "neutral",
+                                "algo influenciado",
+                                "muy influenciado"),
+                     ordered = TRUE)
+```
 
 ## Aplicación de criterios
 
