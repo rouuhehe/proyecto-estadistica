@@ -132,13 +132,7 @@ Se realizó una encuesta por Google Forms a estudiantes de diversas carreras en 
 
 # Limpieza de datos
 
-## Normalización
-
-Durante esta etapa se realizaron ajustes para unificar el formato y la estructura de los datos. Un caso importante fue la detección de columnas duplicadas o que contenían información redundante. Estas columnas fueron combinadas en una sola variable consolidada, asegurando que no se perdiera información relevante y que los datos fueran más coherentes y fáciles de analizar.
-
-### Normalización de variables
-
-#### Primera eliminación de columnas
+#### Corregimiento del DataFrame
 
 Se eliminaron columnas que no aportaban valor al análisis con el fin de trabajar únicamente con la información relevante.
 
@@ -151,10 +145,6 @@ DF <- DF_original # DF es una copia del dataframe original
 DF <- DF_original[, -c(1,2,4,18:147,164:175)] # se eliminan las columnas que no se utilizarán
 DF <- DF[,-c(15,17)]
 ```
-
-#### Renombramiento de columnas
-
-Este proceso permitió obtener un conjunto de datos más limpio, comprensible y adecuado para el análisis posterior.
 
 ```{r}
 DF <- rename(DF,
@@ -190,8 +180,6 @@ DF <- rename(DF,
   # mostrar los nuevos encabezados
   str(DF)
 ```
-
-#### Manejo de duplicados y segunda eliminación de columnas
 
 Dentro de las columnas del *dataframe* se encontraron columnas duplicadas. Estas columnas fueron combinadas para evitar confusiones y para asegurar que los datos se mantuvieran únicos y precisos.
 
@@ -234,9 +222,9 @@ Posteriormente, se guardó el *dataframe* modificado en un archivo *.csv* para s
 write_csv(DF, "Sin columnas innecesarias y renombradas.csv")
 ```
 
-### Estandarización de respuestas
+## Limpieza de cada variable
 
-Se empezó generando una tabla en donde se guardó la tabla normalizada y sobre esta misma se trabajó la estandarización de cada variable.
+Se empezó generando una tabla en donde se guardó la tabla normalizada y sobre esta misma se trabajó la limpieza de cada variable.
 
 ```{r}
 DF_Normalizado <- DF
@@ -364,18 +352,31 @@ DF_Normalizado$Escala <- factor(DF_Normalizado$Escala,
 
 #### Factor Importante
 
-
-#### Edad
-
-Tomando de base a los estudio del INEI sobre la educación, se estableció un rango de edades de 16 a 29 años y debido a los límites aplicados, la muestra se redujo a 1054 observaciones.
-
 ```{r}
-DF_Normalizado$Edad <- as.character(DF_Normalizado$Edad)
-DF_Normalizado$Edad <- gsub("[^0-9]", "", DF_Normalizado$Edad)
-DF_Normalizado$Edad[DF_Normalizado$Edad == ""] <- NA
-DF_Normalizado$Edad <- as.numeric(DF_Normalizado$Edad)
-DF_Normalizado <- DF_Normalizado[DF_Normalizado$Edad >= 16 & DF_Normalizado$Edad <= 29, ]
+library(stringi)
+library(dplyr)
+library(stringr)
 
+DF_Normalizado$`Factor importante` <- DF_Normalizado$`Factor importante` %>%
+  str_split(",") %>%                      # Separar por comas
+  lapply(str_trim) %>%                    # Eliminar espacios extra
+  lapply(stri_trans_general, "Latin-ASCII")  # Quitar acentos
+
+valores_validos <- c(
+  "precio", 
+  "oferta",
+  "marca",
+  "recomendacion",
+  "rendimiento",
+  "portabilidad",
+  "estetica"
+)
+
+DF_Normalizado$`Factor importante` <- sapply(DF_Normalizado$`Factor importante`, function(x) {
+  items <- tolower(trimws(unlist(x)))  # Asegurar limpieza y minúsculas
+  items[!items %in% valores_validos] <- "otros"
+  paste(unique(items), collapse = "; ")  # Unir como lista separada por ;
+})
 ```
 
 #### Costo
@@ -507,12 +508,4 @@ DF_Normalizado$Publicidad <- factor(DF_Normalizado$Publicidad,
                      ordered = TRUE)
 ```
 
-## Aplicación de criterios
 
-## Manejo de outliers y variabilidad
-
-## Gestión de valores nulos
-
-## Gestión de variables
-
-### Descomposición de variables
